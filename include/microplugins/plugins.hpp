@@ -14,7 +14,6 @@
   A C++17-based plugin framework for easy creating and using plugins.
 
   It is supports services for plugins and communications between
-
   plugins kernel and regular plugins.
 
 
