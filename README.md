@@ -43,7 +43,7 @@ You can see [example of plugin](examples/plugin1.cxx), and [example of service](
 * Cmake >= 2.6 (for build examples)
 * Doxygen (for build documentation)
 
-`This framework was test on GNU/Linux with GCC-7.3.0.`
+`This framework was tested on GNU/Linux with GCC-7.3.0`
 
 # License
 This library is distributed under the terms of the [Boost Software License](LICENSE)
