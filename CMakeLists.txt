@@ -30,10 +30,11 @@ target_link_libraries(plugin1 ${LDLIBS})
 # https://habr.com/post/133512/
 set(DOXY_INPUT ${CMAKE_CURRENT_SOURCE_DIR}/include/microplugins)
 set(DOXY_EXAMPLE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/examples)
-set(DOXY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/documentation)
+set(DOXY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc)
+set(DOXY_QUIET YES)
+set(DOXY_WARN_LOGFILE ${CMAKE_CURRENT_BINARY_DIR}/Doxygen.log)
+# set(DOXY_USE_MDFILE_AS_MAINPAGE ${CMAKE_CURRENT_SOURCE_DIR}/README.md)
 add_documentation(doc Doxyfile.in)
 
-
-install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/microplugins DESTINATION include FILES_MATCHING PATTERN "*.hpp *.h")
-
-install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/documentation/html DESTINATION share/doc/microplugins)
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/microplugins DESTINATION include FILES_MATCHING PATTERN "*.hpp")
+install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/html DESTINATION share/doc/microplugins)
