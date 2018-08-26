@@ -15,7 +15,7 @@ Microplugins is a C++ plugin framework for easy creating and using plugins.
 # License
 This library is distributed under the terms of the [Boost Software License - Version 1.0](LICENSE)
 
-# Examples:
+# Examples
 ```c++
 #include <microplugins/plugins.hpp>
 
