@@ -1,10 +1,21 @@
-# Microplugins
-A C++17-based plugin framework for easy creating and using plugins.
+# Introduction
+Microplugins is a C++ plugin framework for easy creating and using plugins.
 
-It is supports services for plugins and communications between
-plugins kernel and regular plugins.
+* It supports services for plugins and communications between plugins kernel and other plugins.
+* It uses a header-only design and makes it easy to integrate with existing projects.
+* It takes care for unloading unused plugins automatically by given time.
 
-Simple example:
+# Requirements
+* GCC with support C++17 standart (including experimental/filesystem)
+* Cmake >= 2.6 (for build examples)
+* Doxygen (for build documentation)
+
+`This framework was tested on GNU/Linux with GCC-7.3.0`
+
+# License
+This library is distributed under the terms of the [Boost Software License - Version 1.0](LICENSE)
+
+# Examples:
 ```c++
 #include <microplugins/plugins.hpp>
 
@@ -20,7 +31,7 @@ static std::any service(std::any a1) {
     std::cout << std::any_cast<int>(result.get()) << std::endl;
   }
 
-  k->stop(); // exit if we don't need service mode
+  k->stop(); // stop if we don't need service mode
   return 0;
 }
 
@@ -36,15 +47,4 @@ int main() {
   return k->error();
 }
 ```
-
 You can see [example of plugin](examples/plugin1.cxx), and [example of service](examples/microservice.cxx)
-
-# Requirements
-* GCC with support C++17 standart (including experimental/filesystem)
-* Cmake >= 2.6 (for build examples)
-* Doxygen (for build documentation)
-
-`This framework was tested on GNU/Linux with GCC-7.3.0`
-
-# License
-This library is distributed under the terms of the [Boost Software License](LICENSE)
