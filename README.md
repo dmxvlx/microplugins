@@ -4,7 +4,7 @@ It is supports services for plugins and communications between
 plugins kernel and regular plugins.
 
 Simple example:
-```c++
+```
 #include <microplugins/plugins.hpp>
 
 
