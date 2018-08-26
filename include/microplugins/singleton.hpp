@@ -16,7 +16,7 @@ namespace micro {
 
     Thread safe singleton, which returns shared pointer to the instance of an object.
 
-    \code c++
+    \code
     #include <microplugins/singleton.hpp>
     #include <string>
 
