@@ -127,7 +127,7 @@ namespace micro {
 
     /** \returns Const reference to task. \param[in] nm name of task in container */
     task<Ts...>& operator[](const std::string& nm) const {
-      iterator_t it = subscribers_.find(nm);
+      const_iterator_t it = subscribers_.find(nm);
       if (it != subscribers_.end()) return *it->second.get();
       else { return empty_task_; }
     }
@@ -142,7 +142,7 @@ namespace micro {
     /** \returns Const reference to task. \param[in] i index of task in container */
     task<Ts...>& operator[](int i) const {
       if (i >= 0 && i < int(subscribers_.size())) {
-        for (iterator_t it = subscribers_.begin(); it != subscribers_.end(); it++) {
+        for (const_iterator_t it = subscribers_.begin(); it != subscribers_.end(); it++) {
           if (!i--) return *it->second.get();
         }
       } else { return empty_task_; }
