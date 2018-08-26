@@ -4,7 +4,7 @@ project(microplugins CXX)
 set_property(GLOBAL PROPERTY CXX_STANDARD 17)
 set_property(GLOBAL PROPERTY CXX_STANDARD_REQUIRED ON)
 
-include(CMake/macros.cmake)
+include(cmake/macros.cmake)
 
 set(microplugins_VERSION_MAJOR 1)
 set(microplugins_VERSION_MINOR 0)
