@@ -15,7 +15,7 @@ static std::any service(std::any a1) {
   std::shared_ptr<micro::iplugin> plugin1 = k->get_plugin("plugin1");
 
   if (plugin1 && plugin1->has<2>("sum2")) {
-    std::shared_future<std::any> result = plugin1->run<2>(125, 175);
+    std::shared_future<std::any> result = plugin1->run<2>("sum2", 125, 175);
     result.wait();
     std::cout << std::any_cast<int>(result.get()) << std::endl;
   }
