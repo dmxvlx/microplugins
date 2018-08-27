@@ -19,8 +19,6 @@ namespace micro {
   protected:
 
     iplugins(float v , const std::string& nm):storage(v, nm) {}
-    
-    iplugins() = delete;
 
   public:
 
