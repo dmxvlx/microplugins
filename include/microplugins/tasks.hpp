@@ -18,15 +18,16 @@ namespace micro {
 
     \code
     micro::tasks<int,int> ts;
+    micro::tasks<std::string,std::string> ts2;
 
     ts.subscribe("sum2", [](int a, int b)->std::any{return a+b;});
-    ts.subscribe("concatenate2", [](std::string a, std::string b)->std::any{return a+b;});
+    ts2.subscribe("concatenate2", [](std::string a, std::string b)->std::any{return a+b;});
 
     std::shared_future<std::any> result = ts["sum2"](15, 15); result.wait();
     std::cout << std::any_cast<int>(result.get()) << std::endl;
 
     std::string s1 = "hello", s2 = " world !";
-    result = ts["concatenate2"](s1, s2); result.wait();
+    result = ts2["concatenate2"](s1, s2); result.wait();
     std::cout << std::any_cast<std::string>(result.get()) << std::endl;
     \endcode
   */
