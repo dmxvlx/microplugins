@@ -109,7 +109,6 @@ namespace micro {
     /** \returns Name of storage. */
     std::string name() const { return name_; }
 
-
     /** \returns Maximum arguments for tasks of storage. */
     int max_args() const { return 6; }
 
