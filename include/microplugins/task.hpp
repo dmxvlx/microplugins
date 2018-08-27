@@ -26,7 +26,8 @@ namespace micro {
 
     \code
     micro::task<int,int> t2 = [](int a, int b)->std::any{return a+b;};
-    std::cout << std::any_cast<int>(t2(10, 90)) << std::endl;
+    std::shared_future<std::any> result = t2(10, 90); result.wait();
+    std::cout << std::any_cast<int>(result.get()) << std::endl;
 
     t2.name("sum2");
     t2.help("function for sum two integers; returns std::any");
