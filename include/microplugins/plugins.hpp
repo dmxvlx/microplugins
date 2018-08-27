@@ -13,20 +13,29 @@
   # Introduction
   Microplugins is a C++ plugin framework for easy creating and using plugins.
 
-  * It supports services for plugins and communications between plugins kernel and other plugins.
+  - It supports services for plugins and communications between plugins kernel and other plugins.
 
-  * It uses a header-only design and makes it easy to integrate with existing projects.
+  - It uses a header-only design and makes it easy to integrate with existing projects.
 
-  * It takes care for unloading unused plugins automatically by given time.
+  - It takes care for unloading unused plugins automatically by given time.
 
   # Requirements
-  * GCC with support C++17 standart (including experimental/filesystem)
+  - Compiler with support C++17 standart (including experimental filesystem)
 
-  * Cmake >= 2.6 (for build examples)
+  - Cmake >= 2.6 (for build examples)
 
-  * Doxygen (for build documentation)
+  - Doxygen (for build documentation)
 
   `This framework was tested on GNU/Linux with GCC-7.3.0`
+  
+  # Installation
+  Compiling:
+  > $ mkdir build && cd build && cmake .. && make
+
+  Installation:
+  > $ make install
+
+  Or just copy folder *include/microplugins* into your project
 
   # License
   This library is distributed under the terms of the Boost Software License - Version 1.0
