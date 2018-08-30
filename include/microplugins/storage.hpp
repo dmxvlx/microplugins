@@ -120,21 +120,21 @@ namespace micro {
       else return {};
     }
 
-    /** \return Amount tasks in storage for given number arguments in I. */
+    /** \returns Amount tasks in storage for given number arguments in I. */
     template<int I> int count() const {
       std::shared_lock<std::shared_mutex> lock(mtx_);
       if constexpr (I >= 0 && I <= 6) { return std::get<I>(tasks_)->count(); }
       else return 0;
     }
 
-    /** \return True if tasks in storage for given number arguments in I has task with index/name `nm'. \param[in] nm index or name of task */
+    /** \returns True if tasks in storage for given number arguments in I has task with index/name `nm'. \param[in] nm index or name of task */
     template<int I, typename T> bool has(T nm) const {
       std::shared_lock<std::shared_mutex> lock(mtx_);
       if constexpr (I >= 0 && I <= 6) { return std::get<I>(tasks_)->has(nm); }
       else return false;
     }
 
-    /** \return True if tasks in storage for given number arguments in I has onced-flag with index/name `nm'. \param[in] nm index or name of task */
+    /** \returns True if tasks in storage for given number arguments in I has onced-flag with index/name `nm'. \param[in] nm index or name of task */
     template<int I, typename T>
     bool is_once(T nm) const {
       std::shared_lock<std::shared_mutex> lock(mtx_);
@@ -142,7 +142,7 @@ namespace micro {
       else return false;
     }
 
-    /** \return Name of task in storage for given number arguments in I. \param[in] nm index of task */
+    /** \returns Name of task in storage for given number arguments in I. \param[in] nm index of task */
     template<int I>
     std::string name(int i) const {
       std::shared_lock<std::shared_mutex> lock(mtx_);
@@ -150,7 +150,7 @@ namespace micro {
       else return {};
     }
 
-    /** \return Message help for task in storage for given number arguments in I. \param[in] nm index or name of task */
+    /** \returns Message help for task in storage for given number arguments in I. \param[in] nm index or name of task */
     template<int I, typename T>
     std::string help(T nm) const {
       std::shared_lock<std::shared_mutex> lock(mtx_);
@@ -158,7 +158,7 @@ namespace micro {
       else return {};
     }
 
-    /** \return Idle(in minutes) for task in storage for given number arguments in I. \param[in] nm index or name of task */
+    /** \returns Idle(in minutes) for task in storage for given number arguments in I. \param[in] nm index or name of task */
     template<int I, typename T>
     int idle(T nm) const {
       std::shared_lock<std::shared_mutex> lock(mtx_);
@@ -166,7 +166,7 @@ namespace micro {
       else return 0;
     }
 
-    /** \return Idle(in minutes) for all tasks in storage for given number arguments in I. */
+    /** \returns Idle(in minutes) for all tasks in storage for given number arguments in I. */
     template<int I>
     int idle() const {
       std::shared_lock<std::shared_mutex> lock(mtx_);
@@ -174,7 +174,7 @@ namespace micro {
       else return 0;
     }
 
-    /** \return Idle(in minutes) for all tasks in storage. */
+    /** \returns Idle(in minutes) for all tasks in storage. */
     int idle() const {
       int ret = std::numeric_limits<int>::max(), current_idle = 0;
       if ((current_idle = idle<0>()) < ret && !(ret = current_idle)) return ret;
