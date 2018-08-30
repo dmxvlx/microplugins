@@ -201,7 +201,7 @@ namespace micro {
         if (lp && (pl = lp())) {
           pl->plugins_ = get_shared_ptr();
           plugins_.push_back({nm,pl,dll});
-          if (pl->has<1>("service")) std::thread(&plugins::service_plugin_cb, this, pl).detach();
+          std::thread(&plugins::service_plugin_cb, this, pl).detach();
           return pl;
         }
       }
@@ -227,6 +227,7 @@ namespace micro {
             std::cerr << "wait termination plugin: " << std::get<1>(plugins_[_i])->name() << std::endl;
             micro::sleep<micro::seconds>(1);
           } plugins_.erase(plugins_.begin()+_i);
+          break;
         }
       }
     }
@@ -246,6 +247,7 @@ namespace micro {
   private:
 
     void service_plugin_cb(std::shared_ptr<iplugin> pl) {
+      if (!pl->has<1>("service")) return;
       std::shared_future<std::any> r;
       pl->do_work_ = true;
       r = (*std::get<1>(pl->tasks_).get())["service"].run_once(std::make_any<std::shared_ptr<iplugin>>(pl));
@@ -253,6 +255,7 @@ namespace micro {
     }
 
     void service_cb(std::shared_ptr<plugins> k) {
+      if (!k->has<1>("service")) return;
       std::shared_future<std::any> r;
       r = (*std::get<1>(k->tasks_).get())["service"].run_once(std::make_any<std::shared_ptr<plugins>>(k));
       r.wait();
