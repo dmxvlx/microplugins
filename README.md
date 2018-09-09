@@ -32,7 +32,7 @@ This library is distributed under the terms of the [Boost Software License - Ver
 # Examples
 Creating plugin:
 ```c++
-#include "iplugins.hpp"
+#include <microplugins/iplugins.hpp>
 
 static std::any sum2(std::any a1, std::any a2) {
   return std::any_cast<int>(a1) + std::any_cast<int>(a2);

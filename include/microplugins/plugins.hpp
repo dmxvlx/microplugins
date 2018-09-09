@@ -49,7 +49,7 @@
 
   Creating plugin:
   ```
-  #include "iplugins.hpp"
+  #include <microplugins/iplugins.hpp>
 
   static std::any sum2(std::any a1, std::any a2) {
     return std::any_cast<int>(a1) + std::any_cast<int>(a2);
