@@ -47,9 +47,35 @@
 
   # Examples
 
+  Creating plugin:
+  ```
+  #include "iplugins.hpp"
+
+  static std::any sum2(std::any a1, std::any a2) {
+    return std::any_cast<int>(a1) + std::any_cast<int>(a2);
+  }
+
+
+  class plugin1 : public micro::iplugin {
+  public:
+
+    plugin1(float v, const std::string& nm):micro::iplugin(v, nm) {
+      subscribe<2>("sum2", sum2);
+    }
+
+  };
+
+
+  static std::shared_ptr<plugin1> instance = nullptr;
+
+  std::shared_ptr<micro::iplugin> import_plugin() {
+    return instance ? instance : (instance = std::make_shared<plugin1>(1.0f, "plugin1"));
+  }
+  ```
+
+  Creating service:
   ```
   #include <microplugins/plugins.hpp>
-
 
   static std::any service(std::any a1) {
     std::shared_ptr<micro::plugins> k = std::any_cast<std::shared_ptr<micro::plugins>>(a1);
@@ -68,14 +94,14 @@
 
 
   int main() {
-   std::shared_ptr<micro::plugins> k = micro::plugins::get();
-   k->subscribe<1>("service", service);
+    std::shared_ptr<micro::plugins> k = micro::plugins::get();
+    k->subscribe<1>("service", service);
 
-   k->run();
+    k->run();
 
-   while (k->is_run()) micro::sleep<micro::milliseconds>(250);
+    while (k->is_run()) micro::sleep<micro::milliseconds>(250);
 
-   return k->error();
+    return k->error();
   }
   ```
   You can see example of plugin, and example of service
