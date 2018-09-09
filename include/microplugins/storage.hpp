@@ -38,35 +38,19 @@ namespace micro {
     using tasks5_t = tasks<std::any,std::any,std::any,std::any,std::any>;
     using tasks6_t = tasks<std::any,std::any,std::any,std::any,std::any,std::any>;
 
-    std::tuple<
-      std::shared_ptr<tasks0_t>,
-      std::shared_ptr<tasks1_t>,
-      std::shared_ptr<tasks2_t>,
-      std::shared_ptr<tasks3_t>,
-      std::shared_ptr<tasks4_t>,
-      std::shared_ptr<tasks5_t>,
-      std::shared_ptr<tasks6_t>
-    > tasks_;
+    std::tuple<tasks0_t,tasks1_t,tasks2_t,tasks3_t,tasks4_t,tasks5_t,tasks6_t> tasks_;
 
   protected:
 
     /** Creates storage of tasks. \param[in] v version of storage \param[in] nm name of storage */
     storage(float v = 1.0f, const std::string& nm = {}):mtx_(),version_(v),name_(nm),
-    tasks_({
-      std::make_shared<tasks0_t>(),
-      std::make_shared<tasks1_t>(),
-      std::make_shared<tasks2_t>(),
-      std::make_shared<tasks3_t>(),
-      std::make_shared<tasks4_t>(),
-      std::make_shared<tasks5_t>(),
-      std::make_shared<tasks6_t>()
-    }) {}
+    tasks_({tasks0_t(),tasks1_t(),tasks2_t(),tasks3_t(),tasks4_t(),tasks5_t(),tasks6_t()}) {}
 
     /** Adds task into storage. \param[in] nm name of task \param[in] t function/method/lambda \param[in] hlp message help for task */
     template<int I, typename T>
     void subscribe(const std::string& nm, const T& t, const std::string& hlp = {}) {
       std::unique_lock<std::shared_mutex> lock(mtx_);
-      if constexpr (I >= 0 && I <= 6) { std::get<I>(tasks_)->subscribe(nm, t, hlp); }
+      if constexpr (I >= 0 && I <= 6) { std::get<I>(tasks_).subscribe(nm, t, hlp); }
     }
 
     /** Removes task from storage. \param[in] nm index or name of task */
@@ -74,9 +58,9 @@ namespace micro {
     void unsubscribe(T nm) {
       std::unique_lock<std::shared_mutex> lock(mtx_);
       if constexpr (I >= 0 && I <= 6) {
-        if ((*std::get<I>(tasks_).get())[nm].is_service() && (*std::get<I>(tasks_).get())[nm].is_once()) {
+        if (std::get<I>(tasks_)[nm].is_service() && std::get<I>(tasks_)[nm].is_once()) {
           return;
-        } else std::get<I>(tasks_)->unsubscribe(nm);
+        } else std::get<I>(tasks_).unsubscribe(nm);
       }
     }
 
@@ -84,7 +68,7 @@ namespace micro {
     template<int I, typename T, typename... Ts2>
     std::shared_future<std::any> run_once(T nm, Ts2&&... args) {
       std::shared_lock<std::shared_mutex> lock(mtx_);
-      if constexpr (I >= 0 && I <= 6) { return (*std::get<I>(tasks_).get())[nm].run_once(args...); }
+      if constexpr (I >= 0 && I <= 6) { return std::get<I>(tasks_)[nm].run_once(args...); }
       else return {};
     }
 
@@ -116,21 +100,21 @@ namespace micro {
     template<int I, typename T, typename... Ts2>
     std::shared_future<std::any> run(T nm, Ts2&&... args) {
       std::shared_lock<std::shared_mutex> lock(mtx_);
-      if constexpr (I >= 0 && I <= 6) { return (*std::get<I>(tasks_).get())[nm](args...); }
+      if constexpr (I >= 0 && I <= 6) { return std::get<I>(tasks_)[nm](args...); }
       else return {};
     }
 
     /** \returns Amount tasks in storage for given number arguments in I. */
     template<int I> int count() const {
       std::shared_lock<std::shared_mutex> lock(mtx_);
-      if constexpr (I >= 0 && I <= 6) { return std::get<I>(tasks_)->count(); }
+      if constexpr (I >= 0 && I <= 6) { return std::get<I>(tasks_).count(); }
       else return 0;
     }
 
     /** \returns True if tasks in storage for given number arguments in I has task with index/name `nm'. \param[in] nm index or name of task */
     template<int I, typename T> bool has(T nm) const {
       std::shared_lock<std::shared_mutex> lock(mtx_);
-      if constexpr (I >= 0 && I <= 6) { return std::get<I>(tasks_)->has(nm); }
+      if constexpr (I >= 0 && I <= 6) { return std::get<I>(tasks_).has(nm); }
       else return false;
     }
 
@@ -138,7 +122,7 @@ namespace micro {
     template<int I, typename T>
     bool is_once(T nm) const {
       std::shared_lock<std::shared_mutex> lock(mtx_);
-      if constexpr (I >= 0 && I <= 6) { return (*std::get<I>(tasks_).get())[nm].is_once(); }
+      if constexpr (I >= 0 && I <= 6) { return std::get<I>(tasks_)[nm].is_once(); }
       else return false;
     }
 
@@ -146,7 +130,7 @@ namespace micro {
     template<int I>
     std::string name(int i) const {
       std::shared_lock<std::shared_mutex> lock(mtx_);
-      if constexpr (I >= 0 && I <= 6) { return (*std::get<I>(tasks_).get())[i].name(); }
+      if constexpr (I >= 0 && I <= 6) { return std::get<I>(tasks_)[i].name(); }
       else return {};
     }
 
@@ -154,7 +138,7 @@ namespace micro {
     template<int I, typename T>
     std::string help(T nm) const {
       std::shared_lock<std::shared_mutex> lock(mtx_);
-      if constexpr (I >= 0 && I <= 6) { return (*std::get<I>(tasks_).get())[nm].help(); }
+      if constexpr (I >= 0 && I <= 6) { return std::get<I>(tasks_)[nm].help(); }
       else return {};
     }
 
@@ -162,7 +146,7 @@ namespace micro {
     template<int I, typename T>
     int idle(T nm) const {
       std::shared_lock<std::shared_mutex> lock(mtx_);
-      if constexpr (I >= 0 && I <= 6) { return (*std::get<I>(tasks_).get())[nm].idle(); }
+      if constexpr (I >= 0 && I <= 6) { return std::get<I>(tasks_)[nm].idle(); }
       else return 0;
     }
 
@@ -170,7 +154,7 @@ namespace micro {
     template<int I>
     int idle() const {
       std::shared_lock<std::shared_mutex> lock(mtx_);
-      if constexpr (I >= 0 && I <= 6) { return std::get<I>(tasks_)->idle(); }
+      if constexpr (I >= 0 && I <= 6) { return std::get<I>(tasks_).idle(); }
       else return 0;
     }
 
