@@ -59,11 +59,10 @@ namespace micro {
 
   public:
 
+    /** Creates empty helper dll. */
     shared_library():dll_(nullptr),filename_() {}
 
     shared_library(const shared_library& rhs) = delete;
-
-    //explicit shared_library(shared_library&& rhs):shared_library() { *this = rhs; }
 
     /** Creates helper dll. \param[in] name_lib name of library for loading \param[in] path0 paths for search dlls in \param[in] flags flags for loading dll \see load(const std::string& name_lib, const std::string& path0, int flags), dlopen(const char *, int) */
     shared_library(const std::string& name_lib, const std::string& path0 = {}, int flags = RTLD_GLOBAL|RTLD_LAZY):shared_library() {
@@ -72,25 +71,25 @@ namespace micro {
 
     ~shared_library() { unload(); }
 
-    /** \return Full path for loaded dll. */
+    /** \returns Full path for loaded dll. */
     std::string filename() const { return filename_; }
 
-    /** \return True if dll is loaded. \see load(const std::string& name_lib, const std::string& path0, int flags) */
+    /** \returns True if dll is loaded. \see load(const std::string& name_lib, const std::string& path0, int flags) */
     bool is_loaded()  const { return (dll_ != nullptr); }
 
     /** Unloads dll. \see load(const std::string& name_lib, const std::string& path0, int flags) */
     void unload() { if (is_loaded()) { dlclose(dll_); dll_ = nullptr; filename_.clear(); } }
 
-    /** \return True if dll was loaded. \param[in] name_lib name of library \param[in] path0 paths for search \param[in] flags flags for loading dll */
+    /** \returns True if dll was loaded. \param[in] name_lib name of library \param[in] path0 paths for search \param[in] flags flags for loading dll */
     bool load(const std::string& name_lib, const std::string& path0 = {}, int flags = RTLD_GLOBAL|RTLD_LAZY) {
       unload();
       return ((dll_ = load_dll(name_lib, path0, flags)) != nullptr);
     }
 
-    /** \return True if dll has symbol. \param[in] s name of symbol/function/variable \see dlsym(void*, const char*) */
+    /** \returns True if dll has symbol. \param[in] s name of symbol/function/variable \see dlsym(void*, const char*) */
     bool has(const std::string& s) const { return (!dll_ || !dlsym(dll_, s.c_str())) ? false : true; }
 
-    /** \returns Function covered by std::function from loaded dll. \param[in] s name of function */
+    /** \returns Pointer covered by std::function from loaded dll. \param[in] s name of function */
     template<typename T>
     std::function<T> get(const std::string& s) {
       std::function<T> r = nullptr;
@@ -98,19 +97,10 @@ namespace micro {
       return r;
     }
 
-    /** \returns raw pointer to symbol \param[in] s name of symbol \see dlsym(void*, const char*) */
+    /** \returns Raw pointer to symbol \param[in] s name of symbol \see dlsym(void*, const char*) */
     void* get_raw(const std::string& s) { return dll_ ? dlsym(dll_, s.c_str()) : nullptr; }
 
     shared_library& operator=(const shared_library& rhs) = delete;
-
-//     shared_library& operator=(shared_library&& rhs) {
-//       if (this != &rhs) {
-//         unload();
-//         dll_ = rhs.dll_; rhs.dll_ = nullptr;
-//         filename_ = std::move(rhs.filename_);
-//       }
-//       return *this;
-//     }
 
   private:
 

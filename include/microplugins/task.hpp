@@ -49,26 +49,31 @@ namespace micro {
 
     /** Creates empty task. */
     task():clock_(micro::now()),args_(sizeof...(Ts)),
-    signature_(),name_(),help_(),fn_(nullptr),is_once_(false) {}
-
-    /** Creates task. \param[in] nm name of task \param[in] t function/method/lambda \param[in] hlp message help for task \see name(), help(), run(Ts2&&... arg), run_once(Ts2&&... arg) */
-    task(const std::string& nm, const decltype(std::function<std::any(Ts...)>()) &t, const std::string& hlp = {}):
-    clock_(micro::now()),args_(sizeof...(Ts)),
-    signature_(typeid(std::any(Ts...)).name()),name_(nm),help_(hlp),fn_(t),is_once_(false) {
+    signature_(typeid(std::any(Ts...)).name()),name_(),help_(),fn_(nullptr),is_once_(false) {
       #if defined(__GNUG__)
       int status = -1;
       std::unique_ptr<char, void(*)(void*)> res {
-        abi::__cxa_demangle(signature_.c_str(), NULL, NULL, &status),
+        abi::__cxa_demangle(signature_.c_str(), nullptr, nullptr, &status),
         std::free
       };
       if (status == 0) signature_ = res.get();
       #endif
     }
 
+    /** Creates task. \param[in] nm name of task \param[in] t function/method/lambda \param[in] hlp message help for task \see name(), help(), run(Ts2&&... arg), run_once(Ts2&&... arg) */
+    task(const std::string& nm, const decltype(std::function<std::any(Ts...)>()) &t, const std::string& hlp = {}):task() {
+      name_ = nm;
+      fn_ = t;
+      help_ = hlp;
+    }
+
+    /** Creates task. \param[in] t function/method/lambda */
     task(const decltype(std::function<std::any(Ts...)>()) &t):task() { *this = t; }
 
+    /** Creates task by copyable constructor. \param[in] rhs task for copying */
     task(const task<Ts...>& rhs):task() { *this = rhs; }
 
+    /** Creates task by movable constructor. \param[in] rhs task for moving */
     task(task<Ts...>&& rhs):task() { *this = rhs; }
 
     ~task() {}
@@ -134,11 +139,13 @@ namespace micro {
     /** \returns True if task is nulled. */
     bool empty() const { return (fn_.target() == nullptr); }
 
+    /** Assignment. \param[in] t function/method/lambda */
     task<Ts...>& operator=(const decltype(std::function<std::any(Ts...)>()) &t) {
       fn_ = t;
       return *this;
     }
 
+    /** Copyable assignment. \param[in] rhs task for copying */
     task<Ts...>& operator=(const task<Ts...>& rhs) {
       if (this != &rhs) {
         clock_ = rhs.clock_;
@@ -152,6 +159,7 @@ namespace micro {
       return *this;
     }
 
+    /** Movable assignment. \param[in] rhs task for moving */
     task<Ts...>& operator=(task<Ts...>&& rhs) {
       if (this != &rhs) {
         clock_ = rhs.clock_;
@@ -160,8 +168,7 @@ namespace micro {
         name_ = std::move(rhs.name_);
         help_ = std::move(rhs.help_);
         fn_ = std::move(rhs.fn_);
-        if (rhs.is_once_) is_once_ = true; // std::atomic is not movable
-        else is_once_ = false;
+        is_once_ = rhs.is_once_; // std::atomic is not movable
       }
       return *this;
     }

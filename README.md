@@ -12,6 +12,12 @@ Microplugins is a C++ plugin framework for easy creating and using plugins.
 
 `This framework was tested on GNU/Linux with GCC-7.3.0`
 
+# Warnings
+[X] Compiler/OS independ
+
+It is not supporting loading and using plugins compiled
+by different compiler and/or linked with different libstdc++
+
 # Installation
 Compiling:
 > $ mkdir build && cd build && cmake .. && make

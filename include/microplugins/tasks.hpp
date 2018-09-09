@@ -44,10 +44,13 @@ namespace micro {
 
   public:
 
+    /** Creates empty tasks. */
     tasks():subscribers_(),empty_task_() {}
 
+    /** Creates tasks by copyable constructor. \param[in] rhs tasks for copying */
     tasks(const tasks<Ts...>& rhs):tasks() { *this = rhs; }
 
+    /** Creates tasks by movable constructor. \param[in] rhs tasks for moving */
     tasks(tasks<Ts...>&& rhs):tasks() { *this = rhs; }
 
     ~tasks() {}
@@ -84,12 +87,12 @@ namespace micro {
       return int(subscribers_.size());
     }
 
-    /** \return True if container has task. \param[in] nm name of task */
+    /** \returns True if container has task. \param[in] nm name of task */
     bool has(const std::string& nm) const {
       return (subscribers_.find(nm) != subscribers_.end());
     }
 
-    /** \return True if container has task. \param[in] i index of task */
+    /** \returns True if container has task. \param[in] i index of task */
     bool has(int i) const {
       return (i >= 0 && i < int(subscribers_.size()));
     }
@@ -104,7 +107,7 @@ namespace micro {
     /** \returns Minimum Idle for all tasks in container. \see task::idle() */
     int idle() const {
       int ret = std::numeric_limits<int>::max(), current_idle = 0;
-      for (const_iterator_t it = subscribers_.begin(); it != subscribers_.end(); it++) {
+      for (const_iterator_t it = subscribers_.cbegin(); it != subscribers_.cend(); it++) {
         if ((current_idle = it->second->idle()) < ret && !(ret = current_idle)) return ret;
       } return ret;
     }
@@ -116,11 +119,13 @@ namespace micro {
       }
     }
 
+    /** Copyable assignment. \param[in] rhs tasks for copying */
     tasks<Ts...>& operator=(const tasks<Ts...>& rhs) {
       if (this != &rhs) subscribers_ = rhs.subscribers_;
       return *this;
     }
 
+    /** Movable assignment. \param[in] rhs tasks for moving */
     tasks<Ts...>& operator=(tasks<Ts...>&& rhs) {
       if (this != &rhs) subscribers_ = std::move(rhs.subscribers_);
       return *this;
@@ -129,7 +134,7 @@ namespace micro {
     /** \returns Const reference to task. \param[in] nm name of task in container */
     task<Ts...>& operator[](const std::string& nm) const {
       const_iterator_t it = subscribers_.find(nm);
-      if (it != subscribers_.end()) return *it->second.get();
+      if (it != subscribers_.cend()) return *it->second.get();
       else { return empty_task_; }
     }
 
@@ -143,7 +148,7 @@ namespace micro {
     /** \returns Const reference to task. \param[in] i index of task in container */
     task<Ts...>& operator[](int i) const {
       if (i >= 0 && i < int(subscribers_.size())) {
-        for (const_iterator_t it = subscribers_.begin(); it != subscribers_.end(); it++) {
+        for (const_iterator_t it = subscribers_.cbegin(); it != subscribers_.cend(); it++) {
           if (!i--) return *it->second.get();
         }
       } else { return empty_task_; }

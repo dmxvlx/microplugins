@@ -27,7 +27,14 @@
   - Doxygen (for build documentation)
 
   `This framework was tested on GNU/Linux with GCC-7.3.0`
-  
+
+  # Warnings
+  [X] Compiler/OS independ
+
+  It is not supporting loading and using plugins compiled
+
+  by different compiler and/or linked with different libstdc++
+
   # Installation
   Compiling:
   > $ mkdir build && cd build && cmake .. && make
@@ -281,7 +288,7 @@ namespace micro {
               }
             } else { k->plugins_.erase(k->plugins_.begin()+_i--); }
           }
-        } micro::sleep<micro::milliseconds>(100);
+        } micro::sleep<micro::milliseconds>(250);
       } k->expiry_ = true;
     }
 

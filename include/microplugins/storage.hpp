@@ -69,7 +69,7 @@ namespace micro {
       if constexpr (I >= 0 && I <= 6) { std::get<I>(tasks_)->subscribe(nm, t, hlp); }
     }
 
-    /** Remove task from storage. \param[in] nm index or name of task */
+    /** Removes task from storage. \param[in] nm index or name of task */
     template<int I, typename T>
     void unsubscribe(T nm) {
       std::unique_lock<std::shared_mutex> lock(mtx_);
@@ -98,7 +98,7 @@ namespace micro {
     /** \returns Major version of storage (before fraction). */
     int major() const { return int(version_); }
 
-    /** \returns Minor version of storage (before fraction). */
+    /** \returns Minor version of storage (after fraction). */
     int minor() const {
       std::string s = std::to_string(version_-int(version_));
       s = s.substr(s.find(".")+1);
