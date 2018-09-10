@@ -9,7 +9,9 @@
 #include <atomic>
 #include <memory>
 #include <cstdlib> // std::free
+#if defined(__GNUG__)
 #include <cxxabi.h> // abi::__cxa_demangle
+#endif
 #include <type_traits>
 #include <limits> // std::numeric_limits
 
