@@ -144,15 +144,15 @@ namespace micro {
       #endif
 
       for (std::size_t _i = 0; _i < paths.size(); _i++) {
-        paths[_i] += "/";
+        std::string str_path = paths[_i] + "/";
         #ifndef _WIN32
-        if (_i >= npaths1 && _i < npaths2) paths[_i] += "../lib/";
+        if (_i >= npaths1 && _i < npaths2) str_path += "../lib/";
         #endif
 
-        for (char* c = std::data(paths[_i]); c && *c; c++) { if (*c == '\\') *c = '/'; }
+        for (char* c = std::data(str_path); c && *c; c++) { if (*c == '\\') *c = '/'; }
 
         const std::regex name_lib_filter(name_lib + filter_str);
-        std::experimental::filesystem::v1::path p(paths[_i]);
+        std::experimental::filesystem::v1::path p(str_path);
         if (!std::experimental::filesystem::v1::is_directory(p)) continue;
         std::experimental::filesystem::v1::directory_iterator dir_iter(p), end_iter;
         for (; dir_iter != end_iter; dir_iter++) {
