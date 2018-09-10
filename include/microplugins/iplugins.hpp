@@ -30,10 +30,10 @@ namespace micro {
     /** \returns Amount loaded plugins. */
     virtual int count_plugins() const { return 0; }
 
-    /** \returns Shared pointer to plugin. \param[in] i index of plugin \see count_plugins() */
+    /** \returns Shared pointer to loaded plugin. \param[in] i index of plugin \see count_plugins() */
     virtual std::shared_ptr<iplugin> get_plugin(int i) { return i ? nullptr : nullptr; }
 
-    /** Loads plugin from system. \returns Shared pointer to plugin. \param[in] nm name of plugin */
+    /** \returns Shared pointer to loaded plugin or attempts to load it from system. \param[in] nm name of plugin */
     virtual std::shared_ptr<iplugin> get_plugin(const std::string& nm) { return nm.size() ? nullptr : nullptr; }
 
   };

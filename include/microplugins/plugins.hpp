@@ -143,7 +143,7 @@ namespace micro {
       \param[in] nm name of the plugins kernel
       \param[in] path0 paths for search plugins exploded by ':', see env $PATH
 
-      \see singleton::get(Ts&&... args), storage::storage(float v, const std::string& nm), storage::version(), storage::major(), storage::minor(), storage::name()
+      \see singleton::get(Ts&&... args), storage::storage(float v, const std::string& nm), storage::version(), storage::name()
     */
     plugins(float v = 1.0, const std::string& nm = "microplugins service", const std::string& path0 = "microplugins"):
     iplugins(v, nm),singleton<plugins>(),std::enable_shared_from_this<plugins>(),
@@ -180,7 +180,7 @@ namespace micro {
     /** \returns Max idle in minutes. \see max_idle(int i) */
     int max_idle() const { return max_idle_; }
 
-    /** Sets max idle. All loaded plugins thats has idle more or equal to it value will be unloaded. \param[in] i value in minutes, 0 - for unlimited resident in RAM. \see max_idle() */
+    /** Sets max idle. All loaded plugins thats has idle more or equal to it value will be unloaded. \param[in] i value in minutes, 0 - for unlimited resident loaded plugins in RAM. \see max_idle() */
     void max_idle(int i) { if (i >= 0) max_idle_ = i; }
 
     /** Runs thread for manage plugins. If plugins kernel has task with name `service' it will called once. \see is_run() */

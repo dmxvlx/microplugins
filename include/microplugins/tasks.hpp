@@ -82,7 +82,7 @@ namespace micro {
       return (*this)[nm](arg...);
     }
 
-    /** \returns number of tasks in container */
+    /** \returns Number of tasks in container */
     int count() const {
       return int(subscribers_.size());
     }

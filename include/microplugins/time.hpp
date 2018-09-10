@@ -79,7 +79,7 @@ namespace micro {
     /** Stops stopwatch. */
     inline void stop() { end_ = now(); }
 
-    /** Resets stopwatch. */
+    /** Resets stopwatch. \param[in] x value for timer */
     inline void reset(clock_t x) { begin_ = end_ = x; }
 
     /** \returns Reference to begin of measure. */

@@ -46,14 +46,14 @@ namespace micro {
     storage(float v = 1.0f, const std::string& nm = {}):mtx_(),version_(v),name_(nm),
     tasks_({tasks0_t(),tasks1_t(),tasks2_t(),tasks3_t(),tasks4_t(),tasks5_t(),tasks6_t()}) {}
 
-    /** Adds task into storage. \param[in] nm name of task \param[in] t function/method/lambda \param[in] hlp message help for task */
+    /** Adds task into storage for given number arguments in I. \param[in] nm name of task \param[in] t function/method/lambda \param[in] hlp message help for task */
     template<int I, typename T>
     void subscribe(const std::string& nm, const T& t, const std::string& hlp = {}) {
       std::unique_lock<std::shared_mutex> lock(mtx_);
       if constexpr (I >= 0 && I <= 6) { std::get<I>(tasks_).subscribe(nm, t, hlp); }
     }
 
-    /** Removes task from storage. \param[in] nm index or name of task */
+    /** Removes task from storage for given number arguments in I. \param[in] nm index or name of task */
     template<int I, typename T>
     void unsubscribe(T nm) {
       std::unique_lock<std::shared_mutex> lock(mtx_);
@@ -64,7 +64,7 @@ namespace micro {
       }
     }
 
-    /** Runs task once. \param[in] nm index or name of task \param[in] args arguments for task \returns shared future for result \see std::shared_future, std::any, std::async */
+    /** Runs task once for given number arguments in I. \param[in] nm index or name of task \param[in] args arguments for task \returns Shared future for result \see std::shared_future, std::any, std::async */
     template<int I, typename T, typename... Ts2>
     std::shared_future<std::any> run_once(T nm, Ts2&&... args) {
       std::shared_lock<std::shared_mutex> lock(mtx_);
@@ -96,7 +96,7 @@ namespace micro {
     /** \returns Maximum arguments for tasks of storage. */
     int max_args() const { return 6; }
 
-    /** Runs task if it is not once-called. \param[in] nm index or name of task \param[in] args arguments for task \returns shared future for result \see std::shared_future, std::any, std::async */
+    /** Runs task if it is not once-called for given number arguments in I. \param[in] nm index or name of task \param[in] args arguments for task \returns Shared future for result \see std::shared_future, std::any, std::async */
     template<int I, typename T, typename... Ts2>
     std::shared_future<std::any> run(T nm, Ts2&&... args) {
       std::shared_lock<std::shared_mutex> lock(mtx_);
@@ -105,20 +105,22 @@ namespace micro {
     }
 
     /** \returns Amount tasks in storage for given number arguments in I. */
-    template<int I> int count() const {
+    template<int I>
+    int count() const {
       std::shared_lock<std::shared_mutex> lock(mtx_);
       if constexpr (I >= 0 && I <= 6) { return std::get<I>(tasks_).count(); }
       else return 0;
     }
 
-    /** \returns True if tasks in storage for given number arguments in I has task with index/name `nm'. \param[in] nm index or name of task */
-    template<int I, typename T> bool has(T nm) const {
+    /** \returns True if tasks in storage has task for given number arguments in I. \param[in] nm index or name of task */
+    template<int I, typename T>
+    bool has(T nm) const {
       std::shared_lock<std::shared_mutex> lock(mtx_);
       if constexpr (I >= 0 && I <= 6) { return std::get<I>(tasks_).has(nm); }
       else return false;
     }
 
-    /** \returns True if tasks in storage for given number arguments in I has onced-flag with index/name `nm'. \param[in] nm index or name of task */
+    /** \returns True if tasks in storage has onced-flag for given number arguments in I. \param[in] nm index or name of task */
     template<int I, typename T>
     bool is_once(T nm) const {
       std::shared_lock<std::shared_mutex> lock(mtx_);
