@@ -123,6 +123,8 @@ namespace micro {
   class plugins final : public iplugins, public singleton<plugins>, public std::enable_shared_from_this<plugins> {
   private:
 
+    friend class singleton<plugins>;
+
     std::atomic<bool> do_work_, expiry_;
     std::atomic<int> error_, max_idle_;
     std::string path_; // paths for plugins
@@ -133,8 +135,6 @@ namespace micro {
         std::shared_ptr<micro::shared_library>
       >
     > plugins_;
-
-    friend class singleton<plugins>;
 
     /**
       Creates plugins object
@@ -189,8 +189,8 @@ namespace micro {
       if (do_work_) return;
       error_ = 0;
       do_work_ = true; expiry_ = false;
-      std::thread(&plugins::loop_cb, this, shared_from_this()).detach();
-      std::thread(&plugins::service_cb, this, shared_from_this()).detach();
+      std::thread(&plugins::loop_cb, shared_from_this(), shared_from_this()).detach();
+      std::thread(&plugins::service_cb, shared_from_this(), shared_from_this()).detach();
     }
 
     /** Stops thread of management plugins. \see run(), is_run() */
@@ -232,7 +232,7 @@ namespace micro {
         if (lp && (pl = lp())) {
           pl->plugins_ = get_shared_ptr();
           plugins_.push_back({nm,pl,dll});
-          std::thread(&plugins::service_plugin_cb, this, pl).detach();
+          std::thread(&plugins::service_plugin_cb, shared_from_this(), pl).detach();
           return pl;
         }
       }
