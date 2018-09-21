@@ -18,7 +18,7 @@ namespace micro {
   class iplugins : public storage {
   protected:
 
-    iplugins(float v, const std::string& nm):storage(v, nm) {}
+    explicit iplugins(float v, const std::string& nm):storage(v, nm) {}
 
   public:
 

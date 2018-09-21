@@ -145,7 +145,7 @@ namespace micro {
 
       \see singleton::get(Ts&&... args), storage::storage(float v, const std::string& nm), storage::version(), storage::name()
     */
-    plugins(float v = 1.0, const std::string& nm = "microplugins service", const std::string& path0 = "microplugins"):
+    explicit plugins(float v = 1.0, const std::string& nm = "microplugins service", const std::string& path0 = "microplugins"):
     iplugins(v, nm),singleton<plugins>(),std::enable_shared_from_this<plugins>(),
     do_work_(false),expiry_(true),error_(0),max_idle_(10),path_(path0),plugins_() {}
 

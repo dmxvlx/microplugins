@@ -43,7 +43,7 @@ namespace micro {
   protected:
 
     /** Creates storage of tasks. \param[in] v version of storage \param[in] nm name of storage */
-    storage(float v = 1.0f, const std::string& nm = {}):mtx_(),version_(v),name_(nm),
+    explicit storage(float v = 1.0f, const std::string& nm = {}):mtx_(),version_(v),name_(nm),
     tasks_({tasks0_t(),tasks1_t(),tasks2_t(),tasks3_t(),tasks4_t(),tasks5_t(),tasks6_t()}) {}
 
     /** Adds task into storage for given number arguments in I. \param[in] nm name of task \param[in] t function/method/lambda \param[in] hlp message help for task */
