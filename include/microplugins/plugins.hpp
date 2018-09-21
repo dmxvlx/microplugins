@@ -301,8 +301,8 @@ namespace micro {
         if (micro::duration<micro::minutes>(last_check, micro::now()) >= 1) {
           last_check = micro::now();
           if (!k->max_idle_) continue;
-          // unload plugin which has idle more or equal than 10 minutes
-          // and the plugin is not service (has no `service' in tasks<1>)
+          // unload plugin which has idle more or equal than `max_idle_' minutes
+          // and the plugin is not service (has no task with name `service' in tasks_<1>)
           std::unique_lock<std::shared_mutex> lock(k->mtx_);
           for (std::size_t _i = 0; _i < k->plugins_.size(); _i++) {
             if (std::get<1>(k->plugins_[_i])) {
