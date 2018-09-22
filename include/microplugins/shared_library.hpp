@@ -44,7 +44,7 @@ namespace micro {
 
   /**
     \class shared_library
-    \brief Manipulation for shared libraries
+    \brief Manipulations for shared libraries
     \author Dmitrij Volin
     \date august of 2018 year
     \copyright Boost Software License - Version 1.0
@@ -130,7 +130,6 @@ namespace micro {
       #if defined(_WIN32) // windows
       filter_version = "[._0-9]{0,12}.dll";
       if (name_lib.find(".dll") == std::string::npos) filter_str += filter_version;
-      SECOND_ATTEMPT:
       #elif defined(__APPLE__) // macos
       filter_version = "[.\\-0-9]{0,12}";
       if (name_lib.find("lib") == std::string::npos) name_lib = "lib" + name_lib;
@@ -166,11 +165,7 @@ namespace micro {
       }
 
       #if defined(_WIN32)
-      if (_name_lib.find("lib") == std::string::npos) {
-        name_lib = "lib" + _name_lib;
-        if (name_lib.find(".dll") == std::string::npos) filter_str += filter_version;
-        goto SECOND_ATTEMPT;
-      }
+      if (_name_lib.find("lib") == std::string::npos) return load_dll("lib" + _name_lib, path0, flags);
       #endif
 
       return ret;
