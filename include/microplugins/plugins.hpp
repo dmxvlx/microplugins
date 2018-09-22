@@ -217,7 +217,7 @@ namespace micro {
       std::unique_lock<std::shared_mutex> lock(mtx_);
       if (!do_work_) return nullptr;
       // search in loaded dll's
-      for (std::size_t _i = 0; _i < plugins_.size(); _i++) {
+      for (int _i = 0; _i < int(plugins_.size()); _i++) {
         if (std::get<0>(plugins_[_i]) == nm) {
           if (std::get<1>(plugins_[_i])) return std::get<1>(plugins_[_i]);
           else plugins_.erase(plugins_.begin()+_i--);
@@ -304,7 +304,7 @@ namespace micro {
           // unload plugin which has idle more or equal than `max_idle_' minutes
           // and the plugin is not service (has no task with name `service' in tasks_<1>)
           std::unique_lock<std::shared_mutex> lock(k->mtx_);
-          for (std::size_t _i = 0; _i < k->plugins_.size(); _i++) {
+          for (int _i = 0; _i < int(k->plugins_.size()); _i++) {
             if (std::get<1>(k->plugins_[_i])) {
               if (k->max_idle_ && std::get<1>(k->plugins_[_i])->idle() >= k->max_idle_ &&
                   !std::get<1>(k->plugins_[_i])->has<1>("service")) {
@@ -318,7 +318,7 @@ namespace micro {
 
     void unload_plugins() {
       while (plugins_.size() > 0) {
-        for (std::size_t _i = 0; _i < plugins_.size(); _i++) {
+        for (int _i = 0; _i < int(plugins_.size()); _i++) {
           if (std::get<1>(plugins_[_i])->do_work_) std::get<1>(plugins_[_i])->do_work_ = false;
           if (std::get<1>(plugins_[_i]).use_count() > 1) {
             std::cerr << "wait termination plugin: " << std::get<1>(plugins_[_i])->name() << std::endl;
