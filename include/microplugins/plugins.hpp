@@ -143,9 +143,9 @@ namespace micro {
       \param[in] nm name of the plugins kernel
       \param[in] path0 paths for search plugins exploded by ':', see env $PATH
 
-      \see singleton::get(Ts&&... args), storage::storage(float v, const std::string& nm), storage::version(), storage::name()
+      \see singleton::get(Ts&&... args), storage::storage(int v, const std::string& nm), storage::version(), storage::name()
     */
-    explicit plugins(float v = 1.0, const std::string& nm = "microplugins service", const std::string& path0 = "microplugins"):
+    explicit plugins(int v = make_version(1,0), const std::string& nm = "microplugins service", const std::string& path0 = "microplugins"):
     iplugins(v, nm),singleton<plugins>(),std::enable_shared_from_this<plugins>(),
     do_work_(false),expiry_(true),error_(0),max_idle_(10),path_(path0),plugins_() {}
 
@@ -166,7 +166,7 @@ namespace micro {
 
     ~plugins() override { stop(); }
 
-    /** \returns Shared pointer to interface. \see iplugins::iplugins(float v, const std::string& nm), storage::storage(float v, const std::string& nm) */
+    /** \returns Shared pointer to interface. \see iplugins::iplugins(int v, const std::string& nm), storage::storage(int v, const std::string& nm) */
     std::shared_ptr<iplugins> get_shared_ptr() override {
       return std::shared_ptr<iplugins>(shared_from_this());
     }

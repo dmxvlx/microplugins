@@ -29,7 +29,7 @@ namespace micro {
 
   protected:
 
-    explicit iplugin(float v, const std::string& nm):storage(v, nm),do_work_(false),plugins_(nullptr) {}
+    explicit iplugin(int v, const std::string& nm):storage(v, nm),do_work_(false),plugins_(nullptr) {}
 
   public:
 

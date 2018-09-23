@@ -15,7 +15,7 @@
   std::shared_ptr<micro::iplugin> self = std::any_cast<std::shared_ptr<micro::iplugin>>(a1);
   std::shared_ptr<micro::iplugins> manager = self->get_plugins();
 
-  std::cerr << "kernel version: " << manager->version() << std::endl;
+  std::cerr << "kernel version: " << manager->major() << "." << manager->minor() << std::endl;
   std::cerr << "kernel name: " << manager->name() << std::endl;
 
   // do work while plugin's service in actived mode (managed by manager)
@@ -74,7 +74,7 @@ static std::any sum2(std::any a1, std::any a2) {
 class plugin1 final : public micro::iplugin, public std::enable_shared_from_this<plugin1> {
 public:
 
-  plugin1(float v, const std::string& nm):micro::iplugin(v, nm),
+  plugin1(int v, const std::string& nm):micro::iplugin(v, nm),
   std::enable_shared_from_this<plugin1>() {
 
     // warning: in this moment, plugin has no manager in micro::iplugin::plugins_ !
@@ -118,7 +118,7 @@ static std::shared_ptr<plugin1> instance = nullptr;
 
 // extern function, that declared in "iplugin.hpp", for export the plugin from dll
 std::shared_ptr<micro::iplugin> import_plugin() {
-  return instance ? instance : (instance = std::make_shared<plugin1>(1.0f, "plugin1"));
+  return instance ? instance : (instance = std::make_shared<plugin1>(micro::make_version(1,0), "plugin1"));
 }
 
 #endif // plugin1_cxx

@@ -8,6 +8,10 @@
 
 namespace micro {
 
+  inline int make_version(int Major, int Minor) { return (Major << 8 | Minor); }
+  inline int get_major(int Version) { return (Version >> 8); }
+  inline int get_minor(int Version) { return (Version & 0xff); }
+
   /**
     \class storage
     \brief Storage for tasks
@@ -27,7 +31,7 @@ namespace micro {
     friend class plugins;
 
     mutable std::shared_mutex mtx_;
-    float version_;
+    int version_;
     std::string name_;
 
     using tasks0_t = tasks<>;
@@ -43,7 +47,7 @@ namespace micro {
   protected:
 
     /** Creates storage of tasks. \param[in] v version of storage \param[in] nm name of storage */
-    explicit storage(float v = 1.0f, const std::string& nm = {}):mtx_(),version_(v),name_(nm),
+    explicit storage(int v = make_version(1,0), const std::string& nm = {}):mtx_(),version_(v),name_(nm),
     tasks_({tasks0_t(),tasks1_t(),tasks2_t(),tasks3_t(),tasks4_t(),tasks5_t(),tasks6_t()}) {}
 
     /** Adds task into storage for given number arguments in I. \param[in] nm name of task \param[in] t function/method/lambda \param[in] hlp message help for task */
@@ -77,18 +81,13 @@ namespace micro {
     virtual ~storage() {}
 
     /** \returns Version of storage. */
-    float version() const { return version_; }
+    int version() const { return version_; }
 
-    /** \returns Major version of storage (before fraction). */
-    int major() const { return int(version_); }
+    /** \returns Major version of storage. */
+    int major() const { return get_major(version_); }
 
-    /** \returns Minor version of storage (after fraction). */
-    int minor() const {
-      std::string s = std::to_string(version_-int(version_));
-      s = s.substr(s.find(".")+1);
-      while (s.length() > 1 && s.back() == '0') s.pop_back(); /// \fixme
-      return std::stoi(s);
-    }
+    /** \returns Minor version of storage. */
+    int minor() const { return get_minor(version_); }
 
     /** \returns Name of storage. */
     std::string name() const { return name_; }
