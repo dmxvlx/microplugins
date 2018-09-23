@@ -59,7 +59,7 @@
   class plugin1 : public micro::iplugin {
   public:
 
-    plugin1(float v, const std::string& nm):micro::iplugin(v, nm) {
+    plugin1(int v, const std::string& nm):micro::iplugin(v, nm) {
       subscribe<2>("sum2", sum2);
     }
 
@@ -69,7 +69,7 @@
   static std::shared_ptr<plugin1> instance = nullptr;
 
   std::shared_ptr<micro::iplugin> import_plugin() {
-    return instance ? instance : (instance = std::make_shared<plugin1>(1.0f, "plugin1"));
+    return instance ? instance : (instance = std::make_shared<plugin1>(micro::make_version(1,0), "plugin1"));
   }
   ```
 
