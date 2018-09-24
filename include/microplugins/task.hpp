@@ -45,7 +45,7 @@ namespace micro {
     int args_;
     std::string signature_, name_, help_;
     decltype(std::function<std::any(Ts...)>()) fn_;
-    bool is_once_;
+    std::atomic<bool> is_once_;
 
   public:
 
