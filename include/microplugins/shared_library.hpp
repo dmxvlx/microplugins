@@ -3,9 +3,23 @@
 #define shared_library_hpp_included
 
 #include <functional>
-#include <experimental/filesystem>
 #include <regex>
 #include <vector>
+
+#ifdef __has_include
+#if __has_include(<filesystem>)
+#include <filesystem>
+namespace std_filesystem = std::filesystem;
+#elif __has_include(<experimental/filesystem>)
+#include <experimental/filesystem>
+namespace std_filesystem = std::experimental::filesystem;
+#else
+#error "Missing <filesystem>"
+#endif
+#else
+#include <filesystem>
+namespace std_filesystem = std::filesystem;
+#endif
 
 #if defined(_WIN32) /* Is Windows ? */
 #include <windows.h>
@@ -151,11 +165,11 @@ namespace micro {
         for (char* c = std::data(str_path); c && *c; c++) { if (*c == '\\') *c = '/'; }
 
         const std::regex name_lib_filter(name_lib + filter_str);
-        std::experimental::filesystem::v1::path p(str_path);
-        if (!std::experimental::filesystem::v1::is_directory(p)) continue;
-        std::experimental::filesystem::v1::directory_iterator dir_iter(p), end_iter;
+        std_filesystem::path p(str_path);
+        if (!std_filesystem::is_directory(p)) continue;
+        std_filesystem::directory_iterator dir_iter(p), end_iter;
         for (; dir_iter != end_iter; dir_iter++) {
-          if (!std::experimental::filesystem::v1::is_regular_file(dir_iter->status())) continue;
+          if (!std_filesystem::is_regular_file(dir_iter->status())) continue;
           if (!std::regex_match(dir_iter->path().filename().generic_string(), name_lib_filter)) continue;
           if ((ret = dlopen(dir_iter->path().c_str(), flags))) {
             filename_ = dir_iter->path().generic_string();
