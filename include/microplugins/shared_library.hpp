@@ -156,6 +156,8 @@ namespace micro {
       else filter_str += filter_version;
       #endif
 
+      const std::regex name_lib_filter(name_lib + filter_str);
+
       for (std::size_t _i = 0; _i < paths.size(); _i++) {
         std::string str_path = paths[_i] + "/";
         #ifndef _WIN32
@@ -164,7 +166,6 @@ namespace micro {
 
         for (char* c = std::data(str_path); c && *c; c++) { if (*c == '\\') *c = '/'; }
 
-        const std::regex name_lib_filter(name_lib + filter_str);
         std_filesystem::path p(str_path);
         if (!std_filesystem::is_directory(p)) continue;
         std_filesystem::directory_iterator dir_iter(p), end_iter;
