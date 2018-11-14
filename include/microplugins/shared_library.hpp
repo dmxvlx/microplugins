@@ -157,6 +157,7 @@ namespace micro {
       #endif
 
       const std::regex name_lib_filter(name_lib + filter_str);
+      std::error_code ec;
 
       for (std::size_t _i = 0; _i < paths.size(); _i++) {
         std::string str_path = paths[_i] + "/";
@@ -167,8 +168,8 @@ namespace micro {
         for (char* c = std::data(str_path); c && *c; c++) { if (*c == '\\') *c = '/'; }
 
         std_filesystem::path p(str_path);
-        if (!std_filesystem::is_directory(p)) continue;
-        std_filesystem::directory_iterator dir_iter(p), end_iter;
+        if (!std_filesystem::is_directory(p, ec)) continue;
+        std_filesystem::directory_iterator dir_iter(p, ec), end_iter;
         for (; dir_iter != end_iter; dir_iter++) {
           if (!std_filesystem::is_regular_file(dir_iter->status())) continue;
           if (!std::regex_match(dir_iter->path().filename().generic_string(), name_lib_filter)) continue;
