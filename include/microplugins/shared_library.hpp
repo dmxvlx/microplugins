@@ -141,17 +141,17 @@ namespace micro {
         }
       }
 
+      filter_version = "[._\\-0-9]{0,12}";
       #if defined(_WIN32) // windows
-      filter_version = "[._0-9]{0,12}.dll";
-      if (name_lib.find(".dll") == std::string::npos) filter_str += filter_version;
+      if (name_lib.find(".dll") == std::string::npos && name_lib.find(".DLL") == std::string::npos) {
+        filter_str += filter_version + ".([dDlL]{3})$";
+      }
       #elif defined(__APPLE__) // macos
-      filter_version = "[.\\-0-9]{0,12}";
-      if (name_lib.find("lib") == std::string::npos) name_lib = "lib" + name_lib;
+      if (name_lib.find("lib") != 0) name_lib = "lib" + name_lib;
       if (name_lib.find(".dylib") == std::string::npos) filter_str += filter_version + ".dylib" + filter_version;
       else filter_str += filter_version;
       #else // *nix
-      filter_version = "[.\\-0-9]{0,12}";
-      if (name_lib.find("lib") == std::string::npos) name_lib = "lib" + name_lib;
+      if (name_lib.find("lib") != 0) name_lib = "lib" + name_lib;
       if (name_lib.find(".so") == std::string::npos) filter_str += filter_version + ".so" + filter_version;
       else filter_str += filter_version;
       #endif
@@ -181,7 +181,7 @@ namespace micro {
       }
 
       #if defined(_WIN32)
-      if (_name_lib.find("lib") == std::string::npos) return load_dll("lib" + _name_lib, path0, flags);
+      if (_name_lib.find("lib") != 0) return load_dll("lib" + _name_lib, path0, flags);
       #endif
 
       return ret;
