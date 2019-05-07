@@ -20,7 +20,7 @@ namespace micro {
     \date august of 2018 year
     \copyright Boost Software License - Version 1.0
 
-    All plugins inherits from this class. It is conteiner for tasks.
+    All plugins inherits from this class. It is container for tasks.
     All tasks has returning and arguments type is std::any.
     Maximum arguments for tasks is 6, minimum is 0.
 
