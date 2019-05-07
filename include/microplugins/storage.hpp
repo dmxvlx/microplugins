@@ -9,8 +9,8 @@
 namespace micro {
 
   inline int is_le() { static const std::uint32_t i = 0x04030201; return (*((std::uint8_t*)(&i)) == 1); }
-  inline int make_version(int Major, int Minor) { return ((is_le() ? Major << 8 : Major >> 8) | Minor); }
-  inline int get_major(int Version) { return (is_le() ? Version >> 8 : Version << 8); }
+  inline int make_version(int Major, int Minor) { return ((Major << 8) | Minor); }
+  inline int get_major(int Version) { return (Version >> 8); }
   inline int get_minor(int Version) { return (is_le() ? Version & 0xff : Version & 0xff000000); }
 
   /**
