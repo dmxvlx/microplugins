@@ -91,7 +91,7 @@ namespace micro {
     int minor() const { return get_minor(version_); }
 
     /** \returns Name of storage. */
-    std::string name() const { return name_; }
+    const std::string& name() const { return name_; }
 
     /** \returns Maximum arguments for tasks of storage. */
     int max_args() const { return 6; }
@@ -128,11 +128,11 @@ namespace micro {
       else return false;
     }
 
-    /** \returns Name of task in storage for given number arguments in I. \param[in] nm index of task */
-    template<int I>
-    std::string name(int i) const {
+    /** \returns Name of task in storage for given number arguments in I. \param[in] nm index or name of task */
+    template<int I, typename T>
+    std::string name(T nm) const {
       std::shared_lock<std::shared_mutex> lock(mtx_);
-      if constexpr (I >= 0 && I <= 6) { return std::get<I>(tasks_)[i].name(); }
+      if constexpr (I >= 0 && I <= 6) { return std::get<I>(tasks_)[nm].name(); }
       else return {};
     }
 

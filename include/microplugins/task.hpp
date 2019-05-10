@@ -84,7 +84,7 @@ namespace micro {
     int args() const { return args_; }
 
     /** \returns Signature of task (calculatings in compile time). */
-    std::string signature() const { return signature_; }
+    const std::string& signature() const { return signature_; }
 
     /** \returns Shared future for result task called. \param[in] arg arguments for task */
     template<typename... Ts2>
@@ -121,13 +121,13 @@ namespace micro {
     void clear_once() { is_once_ = false; }
 
     /** \returns Name of task. \see name(const std::string& nm) */
-    std::string name() const { return name_; }
+    const std::string& name() const { return name_; }
 
     /** Sets name for task. \param[in] nm name for task \see name() */
     void name(const std::string& nm) { name_ = nm; }
 
     /** \returns Message help for task. \see help(const std::string& nm) */
-    std::string help() const { return help_; }
+    const std::string& help() const { return help_; }
 
     /** Sets message help for task. \param[in] hlp message help \see help() */
     void help(const std::string& hlp) { help_ = hlp; }
