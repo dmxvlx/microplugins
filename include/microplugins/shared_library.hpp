@@ -130,8 +130,8 @@ namespace micro {
       paths.insert(paths.end(), paths2.begin(), paths2.end());
       npaths2 = paths.size();
 
-      for (std::size_t _i0 = 0; _i0 < paths0.size(); _i0++) {
-        for (std::size_t _i2 = 0; _i2 < paths2.size(); _i2++) {
+      for (std::size_t _i0 = 0; _i0 < paths0.size(); ++_i0) {
+        for (std::size_t _i2 = 0; _i2 < paths2.size(); ++_i2) {
           std::string m = paths2[_i2] + "/";
           #ifndef _WIN32
           m += "../lib/";
@@ -159,18 +159,18 @@ namespace micro {
       const std::regex name_lib_filter(name_lib + filter_str);
       std::error_code ec;
 
-      for (std::size_t _i = 0; _i < paths.size(); _i++) {
+      for (std::size_t _i = 0; _i < paths.size(); ++_i) {
         std::string str_path = paths[_i] + "/";
         #ifndef _WIN32
         if (_i >= npaths1 && _i < npaths2) str_path += "../lib/";
         #endif
 
-        for (char* c = std::data(str_path); c && *c; c++) { if (*c == '\\') *c = '/'; }
+        for (char* c = std::data(str_path); c && *c; ++c) { if (*c == '\\') *c = '/'; }
 
         std_filesystem::path p(str_path);
         if (!std_filesystem::is_directory(p, ec)) continue;
         std_filesystem::directory_iterator dir_iter(p, ec), end_iter;
-        for (; dir_iter != end_iter; dir_iter++) {
+        for (; dir_iter != end_iter; ++dir_iter) {
           if (!std_filesystem::is_regular_file(dir_iter->status())) continue;
           if (!std::regex_match(dir_iter->path().filename().generic_string(), name_lib_filter)) continue;
           if ((ret = dlopen(dir_iter->path().c_str(), flags))) {
