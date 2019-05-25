@@ -58,7 +58,7 @@ namespace micro {
 
   /**
     \class shared_library
-    \brief Manipulations for shared libraries
+    \brief Managing of shared libraries
     \author Dmitrij Volin
     \date august of 2018 year
     \copyright Boost Software License - Version 1.0
@@ -183,6 +183,10 @@ namespace micro {
       #if defined(_WIN32)
       if (_name_lib.find("lib") != 0) return load_dll("lib" + _name_lib, path0, flags);
       #endif
+
+      if ((ret = dlopen(name_lib.c_str(), flags))) {
+        filename_ = name_lib;
+      }
 
       return ret;
     }
