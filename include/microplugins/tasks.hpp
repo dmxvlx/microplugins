@@ -70,7 +70,7 @@ namespace micro {
     /** Removes task from container. \param[in] i index of task */
     void unsubscribe(std::size_t i) {
       if (i < subscribers_.size()) {
-        for (iterator_t it = subscribers_.begin(); it != subscribers_.end(); it++) {
+        for (iterator_t it = subscribers_.begin(); it != subscribers_.end(); ++it) {
           if (!i--) { subscribers_.erase(it); break; }
         }
       }
@@ -99,7 +99,7 @@ namespace micro {
 
     /** Clears once-flag for all tasks in container \see task::clear_once(), task::is_once() */
     void clear_once() {
-      for (iterator_t it = subscribers_.begin(); it != subscribers_.end(); it++) {
+      for (iterator_t it = subscribers_.begin(); it != subscribers_.end(); ++it) {
         it->second->clear_once();
       }
     }
@@ -107,14 +107,14 @@ namespace micro {
     /** \returns Minimum Idle for all tasks in container. \see task::idle() */
     int idle() const {
       int ret = std::numeric_limits<int>::max(), current_idle = 0;
-      for (const_iterator_t it = subscribers_.cbegin(); it != subscribers_.cend(); it++) {
+      for (const_iterator_t it = subscribers_.cbegin(); it != subscribers_.cend(); ++it) {
         if ((current_idle = it->second->idle()) < ret && !(ret = current_idle)) return ret;
       } return ret;
     }
 
     /** Resets all tasks in container. \see task::reset() */
     void reset() {
-      for (iterator_t it = subscribers_.begin(); it != subscribers_.end(); it++) {
+      for (iterator_t it = subscribers_.begin(); it != subscribers_.end(); ++it) {
         it->second->reset();
       }
     }
@@ -148,7 +148,7 @@ namespace micro {
     /** \returns Const reference to task. \param[in] i index of task in container */
     task<Ts...>& operator[](std::size_t i) const {
       if (i < subscribers_.size()) {
-        for (const_iterator_t it = subscribers_.cbegin(); it != subscribers_.cend(); it++) {
+        for (const_iterator_t it = subscribers_.cbegin(); it != subscribers_.cend(); ++it) {
           if (!i--) return *it->second.get();
         }
       } else { return empty_task_; }
@@ -157,7 +157,7 @@ namespace micro {
     /** \returns Reference to task. \param[in] i index of task in container */
     task<Ts...>& operator[](std::size_t i) {
       if (i < subscribers_.size()) {
-        for (iterator_t it = subscribers_.begin(); it != subscribers_.end(); it++) {
+        for (iterator_t it = subscribers_.begin(); it != subscribers_.end(); ++it) {
           if (!i--) return *it->second.get();
         }
       } else { return empty_task_; }
