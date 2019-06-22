@@ -97,7 +97,10 @@ namespace micro {
     const std::string& name() const { return name_; }
 
     /** \returns Maximum arguments for tasks of storage. */
-    int max_args() const { return 6; }
+    std::size_t max_args() const {
+      constexpr static std::size_t nargs = std::tuple_size_v<std::decay_t<decltype(tasks_)>>;
+      return nargs;
+    }
 
     /** Runs task if it is not once-called for given number arguments in I. \param[in] nm index or name of task \param[in] args arguments for task \returns Shared future for result \see std::shared_future, std::any, std::async */
     template<std::size_t I, typename T, typename... Args>
@@ -110,7 +113,7 @@ namespace micro {
 
     /** \returns Amount tasks in storage for given number arguments in I. */
     template<std::size_t I>
-    int count() const {
+    std::size_t count() const {
       std::shared_lock<std::shared_mutex> lock(mtx_);
       if constexpr (I < std::tuple_size_v<std::decay_t<decltype(tasks_)>>) {
         return std::get<I>(tasks_).count();

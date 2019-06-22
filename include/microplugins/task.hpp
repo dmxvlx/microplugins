@@ -42,7 +42,7 @@ namespace micro {
   private:
 
     clock_t clock_;
-    int args_;
+    std::size_t args_;
     std::string signature_, name_, help_;
     decltype(std::function<std::any(Ts...)>()) fn_;
     std::atomic<bool> is_once_;
@@ -81,7 +81,7 @@ namespace micro {
     ~task() {}
 
     /** \returns Amount of arguments for task (calculatings in compile time). */
-    int args() const { return args_; }
+    std::size_t args() const { return args_; }
 
     /** \returns Signature of task (calculatings in compile time). */
     const std::string& signature() const { return signature_; }

@@ -83,8 +83,8 @@ namespace micro {
     }
 
     /** \returns Number of tasks in container */
-    int count() const {
-      return int(subscribers_.size());
+    std::size_t count() const {
+      return subscribers_.size();
     }
 
     /** \returns True if container has task. \param[in] nm name of task */
