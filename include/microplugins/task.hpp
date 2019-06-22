@@ -62,7 +62,7 @@ namespace micro {
       #endif
     }
 
-    /** Creates task. \param[in] nm name of task \param[in] t function/method/lambda \param[in] hlp message help for task \see name(), help(), run(Ts2&&... arg), run_once(Ts2&&... arg) */
+    /** Creates task. \param[in] nm name of task \param[in] t function/method/lambda \param[in] hlp message help for task \see name(), help(), run(Args&&... arg), run_once(Args&&... arg) */
     task(const std::string& nm, const decltype(std::function<std::any(Ts...)>()) &t, const std::string& hlp = {}):task() {
       name_ = nm;
       fn_ = t;
@@ -87,8 +87,8 @@ namespace micro {
     const std::string& signature() const { return signature_; }
 
     /** \returns Shared future for result task called. \param[in] arg arguments for task */
-    template<typename... Ts2>
-    std::shared_future<std::any> run(Ts2&&... arg) {
+    template<typename... Args>
+    std::shared_future<std::any> run(Args&&... arg) {
       if (is_once_ || !fn_) return {};
       else {
         clock_ = micro::now();
@@ -97,8 +97,8 @@ namespace micro {
     }
 
     /** \returns Shared future for result task called once. \param[in] arg arguments for task */
-    template<typename... Ts2>
-    std::shared_future<std::any> run_once(Ts2&&... arg) {
+    template<typename... Args>
+    std::shared_future<std::any> run_once(Args&&... arg) {
       if (is_once_ || !fn_) return {};
       else {
         is_once_ = true;
@@ -107,17 +107,17 @@ namespace micro {
       }
     }
 
-    /** \see run(Ts2&&... arg) */
-    template<typename... Ts2>
-    std::shared_future<std::any> operator()(Ts2&&... arg) { return run(arg...); }
+    /** \see run(Args&&... arg) */
+    template<typename... Args>
+    std::shared_future<std::any> operator()(Args&&... arg) { return run(arg...); }
 
     /** \returns True if name of task 'service' and numbers of args is 1. */
     bool is_service() const { return (args_ == 1 && name_ == "service"); }
 
-    /** \returns True if task was called once. \see run_once(Ts2&&... arg) */
+    /** \returns True if task was called once. \see run_once(Args&&... arg) */
     bool is_once() const { return is_once_; }
 
-    /** Clears once flag. \see run_once(Ts2&&... arg), is_once() */
+    /** Clears once flag. \see run_once(Args&&... arg), is_once() */
     void clear_once() { is_once_ = false; }
 
     /** \returns Name of task. \see name(const std::string& nm) */

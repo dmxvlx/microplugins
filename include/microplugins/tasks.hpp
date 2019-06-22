@@ -68,17 +68,17 @@ namespace micro {
     }
 
     /** Removes task from container. \param[in] i index of task */
-    void unsubscribe(int i) {
-      if (i >= 0 && i < int(subscribers_.size())) {
+    void unsubscribe(std::size_t i) {
+      if (i < subscribers_.size()) {
         for (iterator_t it = subscribers_.begin(); it != subscribers_.end(); it++) {
           if (!i--) { subscribers_.erase(it); break; }
         }
       }
     }
 
-    /** \returns Shared future for result of called task. \param[in] nm index or name of task \param[in] arg arguments for task \see task::run(Ts2&&... arg), operator[](const std::string& nm), operator[](int i) */
-    template<typename T, typename... Ts2>
-    std::shared_future<std::any> operator()(T nm, Ts2&&... arg) {
+    /** \returns Shared future for result of called task. \param[in] nm index or name of task \param[in] arg arguments for task \see task::run(Args&&... arg), operator[](const std::string& nm), operator[](int i) */
+    template<typename T, typename... Args>
+    std::shared_future<std::any> operator()(T nm, Args&&... arg) {
       return (*this)[nm](arg...);
     }
 
@@ -93,8 +93,8 @@ namespace micro {
     }
 
     /** \returns True if container has task. \param[in] i index of task */
-    bool has(int i) const {
-      return (i >= 0 && i < int(subscribers_.size()));
+    bool has(std::size_t i) const {
+      return (i < subscribers_.size());
     }
 
     /** Clears once-flag for all tasks in container \see task::clear_once(), task::is_once() */
@@ -146,8 +146,8 @@ namespace micro {
     }
 
     /** \returns Const reference to task. \param[in] i index of task in container */
-    task<Ts...>& operator[](int i) const {
-      if (i >= 0 && i < int(subscribers_.size())) {
+    task<Ts...>& operator[](std::size_t i) const {
+      if (i < subscribers_.size()) {
         for (const_iterator_t it = subscribers_.cbegin(); it != subscribers_.cend(); it++) {
           if (!i--) return *it->second.get();
         }
@@ -155,8 +155,8 @@ namespace micro {
     }
 
     /** \returns Reference to task. \param[in] i index of task in container */
-    task<Ts...>& operator[](int i) {
-      if (i >= 0 && i < int(subscribers_.size())) {
+    task<Ts...>& operator[](std::size_t i) {
+      if (i < subscribers_.size()) {
         for (iterator_t it = subscribers_.begin(); it != subscribers_.end(); it++) {
           if (!i--) return *it->second.get();
         }

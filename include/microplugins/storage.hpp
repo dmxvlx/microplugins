@@ -52,17 +52,19 @@ namespace micro {
     tasks_({tasks0_t(),tasks1_t(),tasks2_t(),tasks3_t(),tasks4_t(),tasks5_t(),tasks6_t()}) {}
 
     /** Adds task into storage for given number arguments in I. \param[in] nm name of task \param[in] t function/method/lambda \param[in] hlp message help for task */
-    template<int I, typename T>
+    template<std::size_t I, typename T>
     void subscribe(const std::string& nm, const T& t, const std::string& hlp = {}) {
       std::unique_lock<std::shared_mutex> lock(mtx_);
-      if constexpr (I >= 0 && I <= 6) { std::get<I>(tasks_).subscribe(nm, t, hlp); }
+      if constexpr (I < std::tuple_size_v<std::decay_t<decltype(tasks_)>>) {
+        std::get<I>(tasks_).subscribe(nm, t, hlp);
+      }
     }
 
     /** Removes task from storage for given number arguments in I. \param[in] nm index or name of task */
-    template<int I, typename T>
+    template<std::size_t I, typename T>
     void unsubscribe(T nm) {
       std::unique_lock<std::shared_mutex> lock(mtx_);
-      if constexpr (I >= 0 && I <= 6) {
+      if constexpr (I < std::tuple_size_v<std::decay_t<decltype(tasks_)>>) {
         if (std::get<I>(tasks_)[nm].is_service() && std::get<I>(tasks_)[nm].is_once()) {
           return;
         } else std::get<I>(tasks_).unsubscribe(nm);
@@ -70,11 +72,12 @@ namespace micro {
     }
 
     /** Runs task once for given number arguments in I. \param[in] nm index or name of task \param[in] args arguments for task \returns Shared future for result \see std::shared_future, std::any, std::async */
-    template<int I, typename T, typename... Ts2>
-    std::shared_future<std::any> run_once(T nm, Ts2&&... args) {
+    template<std::size_t I, typename T, typename... Args>
+    std::shared_future<std::any> run_once(T nm, Args&&... args) {
       std::shared_lock<std::shared_mutex> lock(mtx_);
-      if constexpr (I >= 0 && I <= 6) { return std::get<I>(tasks_)[nm].run_once(args...); }
-      else return {};
+      if constexpr (I < std::tuple_size_v<std::decay_t<decltype(tasks_)>>) {
+        return std::get<I>(tasks_)[nm].run_once(args...);
+      } else return {};
     }
 
   public:
@@ -97,67 +100,75 @@ namespace micro {
     int max_args() const { return 6; }
 
     /** Runs task if it is not once-called for given number arguments in I. \param[in] nm index or name of task \param[in] args arguments for task \returns Shared future for result \see std::shared_future, std::any, std::async */
-    template<int I, typename T, typename... Ts2>
-    std::shared_future<std::any> run(T nm, Ts2&&... args) {
+    template<std::size_t I, typename T, typename... Args>
+    std::shared_future<std::any> run(T nm, Args&&... args) {
       std::shared_lock<std::shared_mutex> lock(mtx_);
-      if constexpr (I >= 0 && I <= 6) { return std::get<I>(tasks_)[nm](args...); }
-      else return {};
+      if constexpr (I < std::tuple_size_v<std::decay_t<decltype(tasks_)>>) {
+        return std::get<I>(tasks_)[nm](args...);
+      } else return {};
     }
 
     /** \returns Amount tasks in storage for given number arguments in I. */
-    template<int I>
+    template<std::size_t I>
     int count() const {
       std::shared_lock<std::shared_mutex> lock(mtx_);
-      if constexpr (I >= 0 && I <= 6) { return std::get<I>(tasks_).count(); }
-      else return 0;
+      if constexpr (I < std::tuple_size_v<std::decay_t<decltype(tasks_)>>) {
+        return std::get<I>(tasks_).count();
+      } else return 0;
     }
 
     /** \returns True if tasks in storage has task for given number arguments in I. \param[in] nm index or name of task */
-    template<int I, typename T>
+    template<std::size_t I, typename T>
     bool has(T nm) const {
       std::shared_lock<std::shared_mutex> lock(mtx_);
-      if constexpr (I >= 0 && I <= 6) { return std::get<I>(tasks_).has(nm); }
-      else return false;
+      if constexpr (I < std::tuple_size_v<std::decay_t<decltype(tasks_)>>) {
+        return std::get<I>(tasks_).has(nm);
+      } else return false;
     }
 
     /** \returns True if tasks in storage has onced-flag for given number arguments in I. \param[in] nm index or name of task */
-    template<int I, typename T>
+    template<std::size_t I, typename T>
     bool is_once(T nm) const {
       std::shared_lock<std::shared_mutex> lock(mtx_);
-      if constexpr (I >= 0 && I <= 6) { return std::get<I>(tasks_)[nm].is_once(); }
-      else return false;
+      if constexpr (I < std::tuple_size_v<std::decay_t<decltype(tasks_)>>) {
+        return std::get<I>(tasks_)[nm].is_once();
+      } else return false;
     }
 
     /** \returns Name of task in storage for given number arguments in I. \param[in] nm index or name of task */
-    template<int I, typename T>
+    template<std::size_t I, typename T>
     std::string name(T nm) const {
       std::shared_lock<std::shared_mutex> lock(mtx_);
-      if constexpr (I >= 0 && I <= 6) { return std::get<I>(tasks_)[nm].name(); }
-      else return {};
+      if constexpr (I < std::tuple_size_v<std::decay_t<decltype(tasks_)>>) {
+        return std::get<I>(tasks_)[nm].name();
+      } else return {};
     }
 
     /** \returns Message help for task in storage for given number arguments in I. \param[in] nm index or name of task */
-    template<int I, typename T>
+    template<std::size_t I, typename T>
     std::string help(T nm) const {
       std::shared_lock<std::shared_mutex> lock(mtx_);
-      if constexpr (I >= 0 && I <= 6) { return std::get<I>(tasks_)[nm].help(); }
-      else return {};
+      if constexpr (I < std::tuple_size_v<std::decay_t<decltype(tasks_)>>) {
+        return std::get<I>(tasks_)[nm].help();
+      } else return {};
     }
 
     /** \returns Idle(in minutes) for task in storage for given number arguments in I. \param[in] nm index or name of task */
-    template<int I, typename T>
+    template<std::size_t I, typename T>
     int idle(T nm) const {
       std::shared_lock<std::shared_mutex> lock(mtx_);
-      if constexpr (I >= 0 && I <= 6) { return std::get<I>(tasks_)[nm].idle(); }
-      else return 0;
+      if constexpr (I < std::tuple_size_v<std::decay_t<decltype(tasks_)>>) {
+        return std::get<I>(tasks_)[nm].idle();
+      } else return 0;
     }
 
     /** \returns Idle(in minutes) for all tasks in storage for given number arguments in I. */
-    template<int I>
+    template<std::size_t I>
     int idle() const {
       std::shared_lock<std::shared_mutex> lock(mtx_);
-      if constexpr (I >= 0 && I <= 6) { return std::get<I>(tasks_).idle(); }
-      else return 0;
+      if constexpr (I < std::tuple_size_v<std::decay_t<decltype(tasks_)>>) {
+        return std::get<I>(tasks_).idle();
+      } else return 0;
     }
 
     /** \returns Idle(in minutes) for all tasks in storage. */
