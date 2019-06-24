@@ -200,10 +200,7 @@ namespace micro {
       do_work_ = false;
       while (!expiry_) micro::sleep<micro::milliseconds>(1);
       unload_plugins();
-      std::get<0>(tasks_).clear_once(); std::get<1>(tasks_).clear_once();
-      std::get<2>(tasks_).clear_once(); std::get<3>(tasks_).clear_once();
-      std::get<4>(tasks_).clear_once(); std::get<5>(tasks_).clear_once();
-      std::get<6>(tasks_).clear_once();
+      storage::clear_once();
     }
 
     /** \returns Amount of loaded plugins in this moment. \see iplugins::count_plugins() */

@@ -86,7 +86,7 @@ namespace micro {
     ~shared_library() { unload(); }
 
     /** \returns Full path for loaded dll. */
-    std::string filename() const { return filename_; }
+    const std::string& filename() const { return filename_; }
 
     /** \returns True if dll is loaded. \see load(const std::string& name_lib, const std::string& path0, int flags) */
     bool is_loaded()  const { return (dll_ != nullptr); }

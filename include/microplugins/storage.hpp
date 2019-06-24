@@ -22,7 +22,8 @@ namespace micro {
 
     All plugins inherits from this class. It is container for tasks.
     All tasks has returning and arguments type is std::any.
-    Maximum arguments for tasks is 6, minimum is 0.
+    Maximum arguments for tasks is 6, minimum is 0. You can change it for your needs
+    by adding/removing elements into/from the `tasks_' tuple.
 
     \see subscribe(const std::string& nm, const T& t, const std::string& hlp), unsubscribe(T nm)
   */
@@ -35,21 +36,20 @@ namespace micro {
     int version_;
     std::string name_;
 
-    using tasks0_t = tasks<>;
-    using tasks1_t = tasks<std::any>;
-    using tasks2_t = tasks<std::any,std::any>;
-    using tasks3_t = tasks<std::any,std::any,std::any>;
-    using tasks4_t = tasks<std::any,std::any,std::any,std::any>;
-    using tasks5_t = tasks<std::any,std::any,std::any,std::any,std::any>;
-    using tasks6_t = tasks<std::any,std::any,std::any,std::any,std::any,std::any>;
-
-    std::tuple<tasks0_t,tasks1_t,tasks2_t,tasks3_t,tasks4_t,tasks5_t,tasks6_t> tasks_;
+    std::tuple<
+      tasks<>, // <0>
+      tasks<std::any>, // <1>
+      tasks<std::any,std::any>, // <2>
+      tasks<std::any,std::any,std::any>, // <3>
+      tasks<std::any,std::any,std::any,std::any>, // <4>
+      tasks<std::any,std::any,std::any,std::any,std::any>, // <5>
+      tasks<std::any,std::any,std::any,std::any,std::any,std::any> // <6>
+    > tasks_;
 
   protected:
 
     /** Creates storage of tasks. \param[in] v version of storage \param[in] nm name of storage */
-    explicit storage(int v = make_version(1,0), const std::string& nm = {}):mtx_(),version_(v),name_(nm),
-    tasks_({tasks0_t(),tasks1_t(),tasks2_t(),tasks3_t(),tasks4_t(),tasks5_t(),tasks6_t()}) {}
+    explicit storage(int v = make_version(1,0), const std::string& nm = {}):mtx_(),version_(v),name_(nm),tasks_() {}
 
     /** Adds task into storage for given number arguments in I. \param[in] nm name of task \param[in] t function/method/lambda \param[in] hlp message help for task */
     template<std::size_t I, typename T>
@@ -79,6 +79,9 @@ namespace micro {
         return std::get<I>(tasks_)[nm].run_once(args...);
       } else return {};
     }
+
+    /** Clears once flag in all tasks of this container. \see clear_once_impl(T& tasks_) */
+    void clear_once() { clear_once_impl(tasks_); }
 
   public:
 
@@ -185,6 +188,22 @@ namespace micro {
       if ((current_idle = idle<5>()) < ret && !(ret = current_idle)) return ret;
       if ((current_idle = idle<6>()) < ret && !(ret = current_idle)) return ret;
       return ret;
+    }
+
+  private:
+
+    template<std::size_t I = 0, typename T>
+    inline constexpr static typename std::enable_if_t<I == std::tuple_size_v<T>, void>
+    clear_once_impl(T& tasks_) {
+      if constexpr (std::tuple_size_v<T> > 0) { if (std::get<0>(tasks_).count()) {} }
+      return;
+    }
+
+    template<std::size_t I = 0, typename T>
+    inline constexpr static typename std::enable_if_t<I < std::tuple_size_v<T>, void>
+    clear_once_impl(T& tasks_) {
+      std::get<I>(tasks_).clear_once();
+      clear_once_impl<I+1>(tasks_);
     }
 
   };
