@@ -200,7 +200,7 @@ namespace micro {
       do_work_ = false;
       while (!expiry_) micro::sleep<micro::milliseconds>(1);
       unload_plugins();
-      storage::clear_once();
+      clear_once();
     }
 
     /** \returns Amount of loaded plugins in this moment. \see iplugins::count_plugins() */
