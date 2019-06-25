@@ -111,7 +111,7 @@ namespace micro {
       std::shared_lock<std::shared_mutex> lock(mtx_);
       if constexpr (I < std::tuple_size_v<std::decay_t<decltype(tasks_)>>) {
         return std::get<I>(tasks_)[nm](args...);
-      } else return {};
+      } else { return {}; }
     }
 
     /** \returns Amount tasks in storage for given number arguments in I. */
@@ -120,7 +120,7 @@ namespace micro {
       std::shared_lock<std::shared_mutex> lock(mtx_);
       if constexpr (I < std::tuple_size_v<std::decay_t<decltype(tasks_)>>) {
         return std::get<I>(tasks_).count();
-      } else return 0;
+      } else { return 0; }
     }
 
     /** \returns True if tasks in storage has task for given number arguments in I. \param[in] nm index or name of task */
@@ -129,7 +129,7 @@ namespace micro {
       std::shared_lock<std::shared_mutex> lock(mtx_);
       if constexpr (I < std::tuple_size_v<std::decay_t<decltype(tasks_)>>) {
         return std::get<I>(tasks_).has(nm);
-      } else return false;
+      } else { return false; }
     }
 
     /** \returns True if tasks in storage has onced-flag for given number arguments in I. \param[in] nm index or name of task */
@@ -138,7 +138,7 @@ namespace micro {
       std::shared_lock<std::shared_mutex> lock(mtx_);
       if constexpr (I < std::tuple_size_v<std::decay_t<decltype(tasks_)>>) {
         return std::get<I>(tasks_)[nm].is_once();
-      } else return false;
+      } else { return false; }
     }
 
     /** \returns Name of task in storage for given number arguments in I. \param[in] nm index or name of task */
@@ -147,7 +147,7 @@ namespace micro {
       std::shared_lock<std::shared_mutex> lock(mtx_);
       if constexpr (I < std::tuple_size_v<std::decay_t<decltype(tasks_)>>) {
         return std::get<I>(tasks_)[nm].name();
-      } else return {};
+      } else { return {}; }
     }
 
     /** \returns Message help for task in storage for given number arguments in I. \param[in] nm index or name of task */
@@ -156,7 +156,7 @@ namespace micro {
       std::shared_lock<std::shared_mutex> lock(mtx_);
       if constexpr (I < std::tuple_size_v<std::decay_t<decltype(tasks_)>>) {
         return std::get<I>(tasks_)[nm].help();
-      } else return {};
+      } else { return {}; }
     }
 
     /** \returns Idle(in minutes) for task in storage for given number arguments in I. \param[in] nm index or name of task */
@@ -165,7 +165,7 @@ namespace micro {
       std::shared_lock<std::shared_mutex> lock(mtx_);
       if constexpr (I < std::tuple_size_v<std::decay_t<decltype(tasks_)>>) {
         return std::get<I>(tasks_)[nm].idle();
-      } else return 0;
+      } else { return 0; }
     }
 
     /** \returns Idle(in minutes) for all tasks in storage for given number arguments in I. */
@@ -174,19 +174,19 @@ namespace micro {
       std::shared_lock<std::shared_mutex> lock(mtx_);
       if constexpr (I < std::tuple_size_v<std::decay_t<decltype(tasks_)>>) {
         return std::get<I>(tasks_).idle();
-      } else return 0;
+      } else { return 0; }
     }
 
     /** \returns Idle(in minutes) for all tasks in storage. */
     int idle() const {
       int ret = std::numeric_limits<int>::max(), current_idle = 0;
-      if ((current_idle = idle<0>()) < ret && !(ret = current_idle)) return ret;
-      if ((current_idle = idle<1>()) < ret && !(ret = current_idle)) return ret;
-      if ((current_idle = idle<2>()) < ret && !(ret = current_idle)) return ret;
-      if ((current_idle = idle<3>()) < ret && !(ret = current_idle)) return ret;
-      if ((current_idle = idle<4>()) < ret && !(ret = current_idle)) return ret;
-      if ((current_idle = idle<5>()) < ret && !(ret = current_idle)) return ret;
-      if ((current_idle = idle<6>()) < ret && !(ret = current_idle)) return ret;
+      if ((current_idle = idle<0>()) < ret && !(ret = current_idle)) { return ret; }
+      if ((current_idle = idle<1>()) < ret && !(ret = current_idle)) { return ret; }
+      if ((current_idle = idle<2>()) < ret && !(ret = current_idle)) { return ret; }
+      if ((current_idle = idle<3>()) < ret && !(ret = current_idle)) { return ret; }
+      if ((current_idle = idle<4>()) < ret && !(ret = current_idle)) { return ret; }
+      if ((current_idle = idle<5>()) < ret && !(ret = current_idle)) { return ret; }
+      if ((current_idle = idle<6>()) < ret && !(ret = current_idle)) { return ret; }
       return ret;
     }
 

@@ -182,7 +182,7 @@ namespace micro {
     int max_idle() const { return max_idle_; }
 
     /** Sets max idle. All loaded plugins thats has idle more or equal to it value will be unloaded. \param[in] i value in minutes, 0 - for unlimited resident loaded plugins in RAM. \see max_idle() */
-    void max_idle(int i) { if (i >= 0) max_idle_ = i; }
+    void max_idle(int i) { if (i >= 0) { max_idle_ = i; } }
 
     /** Runs thread for manage plugins. If plugins kernel has task with name `service' it will called once. \see is_run() */
     void run() {
