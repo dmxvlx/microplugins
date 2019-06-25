@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(microplugins_VERSION_MAJOR 1)
-set(microplugins_VERSION_MINOR 0)
+set(microplugins_VERSION_MINOR 1)
 
 if(WIN32)
   set(CXXFLAGS -O2 -s -Wall -Wextra)
