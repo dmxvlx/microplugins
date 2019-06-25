@@ -42,17 +42,17 @@ namespace micro {
     int version_;
     std::string name_;
 
-    template<typename T, unsigned N, typename... Args>
-    struct gen_task_type { using type = typename gen_task_type<T, N-1, T, Args...>::type; };
+    template<typename T, std::size_t N, typename... Args>
+    struct gen_tasks_type { using type = typename gen_tasks_type<T, N-1, T, Args...>::type; };
 
     template<typename T, typename... Args>
-    struct gen_task_type<T, 0, Args...> { using type = tasks<Args...>; };
+    struct gen_tasks_type<T, 0, Args...> { using type = tasks<Args...>; };
 
     template<typename T, std::size_t N, typename... Args>
-    struct gen_storage_type { using type = typename gen_storage_type<T, N-1, typename gen_task_type<T, N>::type, Args...>::type; };
+    struct gen_storage_type { using type = typename gen_storage_type<T, N-1, typename gen_tasks_type<T, N>::type, Args...>::type; };
 
     template<typename T, typename... Args>
-    struct gen_storage_type<T, 0, Args...> { using type = std::tuple<typename gen_task_type<T, 0>::type, Args...>; };
+    struct gen_storage_type<T, 0, Args...> { using type = std::tuple<typename gen_tasks_type<T, 0>::type, Args...>; };
 
     typename gen_storage_type<std::any, L>::type tasks_;
 
