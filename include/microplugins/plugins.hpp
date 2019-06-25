@@ -271,7 +271,7 @@ namespace micro {
   private:
 
     void service_plugin_cb(std::shared_ptr<iplugin> pl) {
-      if (!pl->has<1>("service")) return;
+      if (!pl->has<1>("service")) { return; }
       std::shared_future<std::any> r;
       pl->do_work_ = true;
       r = std::get<1>(pl->tasks_)["service"].run_once(std::make_any<std::shared_ptr<iplugin>>(pl));
@@ -279,7 +279,7 @@ namespace micro {
     }
 
     void service_cb(std::shared_ptr<plugins> k) {
-      if (!k->has<1>("service")) return;
+      if (!k->has<1>("service")) { return; }
       std::shared_future<std::any> r;
       r = std::get<1>(k->tasks_)["service"].run_once(std::make_any<std::shared_ptr<plugins>>(k));
       r.wait();
