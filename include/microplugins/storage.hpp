@@ -66,9 +66,7 @@ namespace micro {
     void subscribe(const std::string& nm, const T& t, const std::string& hlp = {}) {
       static_assert(I < std::tuple_size_v<std::decay_t<decltype(tasks_)>>, "\n\nOut of range for valid number arguments of plugin's function. \nPlease, set it to larger value by: /path/to/build $ cmake -DMAX_PLUGINS_ARGS=12 ../ or what you need...\n");
       std::unique_lock<std::shared_mutex> lock(mtx_);
-      if constexpr (I < std::tuple_size_v<std::decay_t<decltype(tasks_)>>) {
-        std::get<I>(tasks_).subscribe(nm, t, hlp);
-      }
+      std::get<I>(tasks_).subscribe(nm, t, hlp);
     }
 
     /** Removes task from storage for given number arguments in I. \param[in] nm index or name of task */
