@@ -225,9 +225,13 @@ namespace micro {
       std::shared_ptr<iplugin<>> ret = nullptr;
       if (auto dll = std::make_shared<shared_library>(nm, path_); dll && dll->is_loaded()) {
         if (auto loader = dll->get<import_plugin_cb_t>("import_plugin"); loader && (ret = loader())) {
-          ret->plugins_ = get_shared_ptr();
-          plugins_[nm] = {dll, ret};
-          std::thread(&plugins<>::service_plugin_cb, plugins<>::shared_from_this(), ret).detach();
+          if (ret->max_args() == max_args()) {
+            ret->plugins_ = get_shared_ptr();
+            plugins_[nm] = {dll, ret};
+            std::thread(&plugins<>::service_plugin_cb, plugins<>::shared_from_this(), ret).detach();
+          } else {
+            std::clog << "plugin '" << nm << "' has " << ret->max_args() << " arguments for functions, expected number: " << max_args() << std::endl;
+          }
         }
       } return ret;
     }
