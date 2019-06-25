@@ -1,21 +1,21 @@
 cmake_minimum_required(VERSION 2.6)
+include(cmake/macros.cmake)
+
 project(microplugins CXX)
 
-set_property(GLOBAL PROPERTY CXX_STANDARD 17)
-set_property(GLOBAL PROPERTY CXX_STANDARD_REQUIRED ON)
-
-include(cmake/macros.cmake)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(microplugins_VERSION_MAJOR 1)
 set(microplugins_VERSION_MINOR 0)
 
 if(WIN32)
-set(CXXFLAGS -Wall -Wextra -std=c++17)
-set(LDLIBS pthread stdc++fs ole32 oleaut32 psapi advapi32)
-else(WIN32)
-set(CXXFLAGS -Wall -Wextra -std=c++17)
-set(LDLIBS dl pthread stdc++fs)
-endif(WIN32)
+  set(CXXFLAGS -O2 -s -Wall -Wextra)
+  set(LDLIBS pthread stdc++fs ole32 oleaut32 psapi advapi32)
+else()
+  set(CXXFLAGS -O2 -s -Wall -Wextra)
+  set(LDLIBS dl pthread stdc++fs)
+endif()
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/include/microplugins)
 
