@@ -56,10 +56,10 @@
   }
 
 
-  class plugin1 : public micro::iplugin {
+  class plugin1 : public micro::iplugin<> {
   public:
 
-    plugin1(int v, const std::string& nm):micro::iplugin(v, nm) {
+    plugin1(int v, const std::string& nm):micro::iplugin<>(v, nm) {
       subscribe<2>("sum2", sum2);
     }
 
@@ -68,7 +68,7 @@
 
   static std::shared_ptr<plugin1> instance = nullptr;
 
-  std::shared_ptr<micro::iplugin> import_plugin() {
+  std::shared_ptr<micro::iplugin<>> import_plugin() {
     return instance ? instance : (instance = std::make_shared<plugin1>(micro::make_version(1,0), "plugin1"));
   }
   ```
@@ -78,9 +78,9 @@
   #include <microplugins/plugins.hpp>
 
   static std::any service(std::any a1) {
-    std::shared_ptr<micro::plugins> k = std::any_cast<std::shared_ptr<micro::plugins>>(a1);
+    std::shared_ptr<micro::plugins<>> k = std::any_cast<std::shared_ptr<micro::plugins<>>>(a1);
 
-    std::shared_ptr<micro::iplugin> plugin1 = k->get_plugin("plugin1");
+    std::shared_ptr<micro::iplugin<>> plugin1 = k->get_plugin("plugin1");
 
     if (plugin1 && plugin1->has<2>("sum2")) {
       std::shared_future<std::any> result = plugin1->run<2>("sum2", 125, 175);
@@ -94,7 +94,7 @@
 
 
   int main() {
-    std::shared_ptr<micro::plugins> k = micro::plugins::get();
+    std::shared_ptr<micro::plugins<>> k = micro::plugins<>::get();
     k->subscribe<1>("service", service);
 
     k->run();
@@ -121,7 +121,7 @@ namespace micro {
     \example microservice.cxx
   */
   template<std::size_t L = MAX_PLUGINS_ARGS>
-  class plugins final : public iplugins<L>, public singleton<plugins<L>>, public std::enable_shared_from_this<plugins<L>> {
+  class plugins final : public iplugins<>, public singleton<plugins<L>>, public std::enable_shared_from_this<plugins<L>> {
   private:
 
     friend class singleton<plugins<L>>;
@@ -134,7 +134,7 @@ namespace micro {
       std::string,
       std::tuple<
         std::shared_ptr<shared_library>,
-        std::shared_ptr<iplugin<L>>
+        std::shared_ptr<iplugin<>>
       >
     > plugins_;
 
@@ -148,7 +148,7 @@ namespace micro {
       \see singleton::get(Ts&&... args), storage::storage(int v, const std::string& nm), storage::version(), storage::name()
     */
     explicit plugins(int v = make_version(1,0), const std::string& nm = "microplugins service", const std::string& path0 = "microplugins"):
-    iplugins<L>(v, nm),singleton<plugins<L>>(),std::enable_shared_from_this<plugins<L>>(),
+    iplugins<>(v, nm),singleton<plugins<L>>(),std::enable_shared_from_this<plugins<L>>(),
     do_work_(false),expiry_(true),error_(0),max_idle_(10),path_(path0),plugins_() {}
 
   public:
@@ -190,7 +190,7 @@ namespace micro {
 
     /** Runs thread for manage plugins. If plugins kernel has task with name `service' it will called once. \see is_run() */
     void run() {
-      std::unique_lock<std::shared_mutex> lock(plugins<>::mtx_);
+      std::unique_lock<std::shared_mutex> lock(storage<>::mtx_);
       if (do_work_) { return; }
       error_ = 0;
       do_work_ = true;
@@ -201,23 +201,23 @@ namespace micro {
 
     /** Stops thread of management plugins. \see run(), is_run() */
     void stop() {
-      std::unique_lock<std::shared_mutex> lock(plugins<>::mtx_);
+      std::unique_lock<std::shared_mutex> lock(storage<>::mtx_);
       if (!do_work_) { return; }
       do_work_ = false;
       while (!expiry_) { micro::sleep<micro::milliseconds>(50); }
       unload_plugins();
-      plugins<>::clear_once();
+      storage<>::clear_once();
     }
 
     /** \returns Amount of loaded plugins in this moment. \see iplugins::count_plugins() */
     std::size_t count_plugins() const override {
-      std::shared_lock<std::shared_mutex> lock(plugins<>::mtx_);
+      std::shared_lock<std::shared_mutex> lock(storage<>::mtx_);
       return do_work_ ? std::size(plugins_) : 0;
     }
 
     /** \returns Shared pointer to plugin. \param[in] nm name of plugin \see iplugins::get_plugin(const std::string& nm) */
     std::shared_ptr<iplugin<>> get_plugin(const std::string& nm) override {
-      std::unique_lock<std::shared_mutex> lock(plugins<>::mtx_);
+      std::unique_lock<std::shared_mutex> lock(storage<>::mtx_);
       if (!do_work_) { return nullptr; }
       // search in loaded dll's
       if (auto it = plugins_.find(nm); it != std::end(plugins_)) { return std::get<1>(it->second); }
@@ -233,8 +233,8 @@ namespace micro {
     }
 
     /** \returns Shared pointer to plugin. \param[in] i index of plugin \see count_plugins(), iplugins::get_plugin(int i) */
-    std::shared_ptr<iplugin<L>> get_plugin(std::size_t i) override {
-      std::shared_lock<std::shared_mutex> lock(plugins<>::mtx_);
+    std::shared_ptr<iplugin<>> get_plugin(std::size_t i) override {
+      std::shared_lock<std::shared_mutex> lock(storage<>::mtx_);
       if (do_work_ && i < std::size(plugins_)) {
         for (auto it = std::begin(plugins_); it != std::end(plugins_); ++it) {
           if (!i--) { return std::get<1>(it->second); }
@@ -244,7 +244,7 @@ namespace micro {
 
     /** Unloads plugin. \param[in] nm name of plugin */
     void unload_plugin(const std::string& nm) {
-      std::unique_lock<std::shared_mutex> lock(plugins<>::mtx_);
+      std::unique_lock<std::shared_mutex> lock(storage<>::mtx_);
       if (!do_work_) { return; }
       if (auto it = plugins_.find(nm); it != std::end(plugins_)) {
         if (std::get<1>(it->second)->do_work_) { std::get<1>(it->second)->do_work_ = false; }
@@ -257,7 +257,7 @@ namespace micro {
 
     /** Unloads plugin. \param[in] i index of plugin \see count_plugins() */
     void unload_plugin(std::size_t i) {
-      std::unique_lock<std::shared_mutex> lock(plugins<>::mtx_);
+      std::unique_lock<std::shared_mutex> lock(storage<>::mtx_);
       if (do_work_ && i < std::size(plugins_)) {
         for (auto it = std::begin(plugins_); it != std::end(plugins_); ++it) {
           if (!i--) {

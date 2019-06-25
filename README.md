@@ -39,10 +39,10 @@ static std::any sum2(std::any a1, std::any a2) {
 }
 
 
-class plugin1 : public micro::iplugin {
+class plugin1 : public micro::iplugin<> {
 public:
 
-  plugin1(int v, const std::string& nm):micro::iplugin(v, nm) {
+  plugin1(int v, const std::string& nm):micro::iplugin<>(v, nm) {
     subscribe<2>("sum2", sum2);
   }
 
@@ -51,7 +51,7 @@ public:
 
 static std::shared_ptr<plugin1> instance = nullptr;
 
-std::shared_ptr<micro::iplugin> import_plugin() {
+std::shared_ptr<micro::iplugin<>> import_plugin() {
   return instance ? instance : (instance = std::make_shared<plugin1>(micro::make_version(1,0), "plugin1"));
 }
 ```
@@ -61,9 +61,9 @@ Creating service:
 #include <microplugins/plugins.hpp>
 
 static std::any service(std::any a1) {
-  std::shared_ptr<micro::plugins> k = std::any_cast<std::shared_ptr<micro::plugins>>(a1);
+  std::shared_ptr<micro::plugins<>> k = std::any_cast<std::shared_ptr<micro::plugins<>>>(a1);
 
-  std::shared_ptr<micro::iplugin> plugin1 = k->get_plugin("plugin1");
+  std::shared_ptr<micro::iplugin<>> plugin1 = k->get_plugin("plugin1");
 
   if (plugin1 && plugin1->has<2>("sum2")) {
     std::shared_future<std::any> result = plugin1->run<2>("sum2", 125, 175);
@@ -77,7 +77,7 @@ static std::any service(std::any a1) {
 
 
 int main() {
-  std::shared_ptr<micro::plugins> k = micro::plugins::get();
+  std::shared_ptr<micro::plugins<>> k = micro::plugins<>::get();
   k->subscribe<1>("service", service);
 
   k->run();

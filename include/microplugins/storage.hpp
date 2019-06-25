@@ -30,7 +30,7 @@ namespace micro {
 
     > ~/build $ cmake -DMAX_PLUGINS_ARGS=2 ../
 
-    \see subscribe(const std::string& nm, const T& t, const std::string& hlp), unsubscribe(T nm)
+    \see subscribe(const std::string& nm, const T& t, const std::string& hlp), unsubscribe(const T& nm)
   */
   template<std::size_t L = MAX_PLUGINS_ARGS>
   class storage {
@@ -73,7 +73,7 @@ namespace micro {
 
     /** Removes task from storage for given number arguments in I. \param[in] nm index or name of task */
     template<std::size_t I, typename T>
-    void unsubscribe(T nm) {
+    void unsubscribe(const T& nm) {
       std::unique_lock<std::shared_mutex> lock(mtx_);
       if constexpr (I < std::tuple_size_v<std::decay_t<decltype(tasks_)>>) {
         if (std::get<I>(tasks_)[nm].is_service() && std::get<I>(tasks_)[nm].is_once()) {

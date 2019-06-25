@@ -6,7 +6,7 @@
 
 namespace micro {
 
-  template<std::size_t L> class iplugins;
+  template<std::size_t> class iplugins;
 
   /**
     \class iplugin
@@ -40,10 +40,10 @@ namespace micro {
     virtual std::shared_ptr<iplugin<L>> get_shared_ptr() { return nullptr; }
 
     /** \returns State of service of this plugin. \retval true if service can continue do work \retval false if service of this plugin must be interrupted/stopped */
-    bool is_run() const { return do_work_; }
+    inline bool is_run() const { return do_work_; }
 
     /** \returns Shared pointer to plugins kernel \see iplugins */
-    std::shared_ptr<iplugins<L>> get_plugins() { return plugins_; }
+    inline std::shared_ptr<iplugins<L>> get_plugins() { return plugins_; }
 
   };
 
