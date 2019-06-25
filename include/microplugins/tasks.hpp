@@ -1,8 +1,9 @@
 /** \file tasks.hpp */
-#ifndef tasks_hpp_included
-#define tasks_hpp_included
+#ifndef TASKS_HPP_INCLUDED
+#define TASKS_HPP_INCLUDED
 
 #include "task.hpp"
+
 #include <map>
 
 namespace micro {
@@ -155,4 +156,4 @@ namespace micro {
 
 } // namespace micro
 
-#endif // tasks_hpp_included
+#endif // TASKS_HPP_INCLUDED

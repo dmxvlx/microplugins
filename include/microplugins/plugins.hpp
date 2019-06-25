@@ -1,10 +1,11 @@
 /** \file plugins.hpp */
-#ifndef plugins_hpp_included
-#define plugins_hpp_included
+#ifndef PLUGINS_HPP_INCLUDED
+#define PLUGINS_HPP_INCLUDED
 
 #include "iplugins.hpp"
 #include "shared_library.hpp"
 #include "singleton.hpp"
+
 #include <iostream> // std::clog
 
 /**
@@ -329,4 +330,4 @@ namespace micro {
 
 } // namespace micro
 
-#endif // plugins_hpp_included
+#endif // PLUGINS_HPP_INCLUDED

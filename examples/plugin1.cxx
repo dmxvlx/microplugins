@@ -1,7 +1,8 @@
-#ifndef plugin1_cxx
-#define plugin1_cxx
+#ifndef PLUGIN1_CXX
+#define PLUGIN1_CXX
 
 #include "iplugins.hpp"
+
 #include <iostream>
 
 // note: in microplugins, all returning values
@@ -121,4 +122,4 @@ std::shared_ptr<micro::iplugin<>> import_plugin() {
   return instance ? instance : (instance = std::make_shared<plugin1>(micro::make_version(1,0), "plugin1"));
 }
 
-#endif // plugin1_cxx
+#endif // PLUGIN1_CXX

@@ -1,8 +1,9 @@
 /** \file storage.hpp */
-#ifndef storage_hpp_included
-#define storage_hpp_included
+#ifndef STORAGE_HPP_INCLUDED
+#define STORAGE_HPP_INCLUDED
 
 #include "tasks.hpp"
+
 #include <shared_mutex>
 #include <tuple>
 
@@ -218,4 +219,4 @@ namespace micro {
 
 } // namespace micro
 
-#endif // storage_hpp_included
+#endif // STORAGE_HPP_INCLUDED

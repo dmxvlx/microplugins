@@ -1,6 +1,6 @@
 /** \file iplugins.hpp */
-#ifndef iplugins_hpp_included
-#define iplugins_hpp_included
+#ifndef IPLUGINS_HPP_INCLUDED
+#define IPLUGINS_HPP_INCLUDED
 
 #include "iplugin.hpp"
 
@@ -41,4 +41,4 @@ namespace micro {
 
 } // namespace micro
 
-#endif // iplugins_hpp_included
+#endif // IPLUGINS_HPP_INCLUDED

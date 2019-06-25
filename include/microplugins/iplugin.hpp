@@ -1,6 +1,6 @@
 /** \file iplugin.hpp */
-#ifndef iplugin_hpp_included
-#define iplugin_hpp_included
+#ifndef IPLUGIN_HPP_INCLUDED
+#define IPLUGIN_HPP_INCLUDED
 
 #include "storage.hpp"
 
@@ -57,4 +57,4 @@ extern "C" {
   extern std::shared_ptr<micro::iplugin<>> import_plugin();
 }
 
-#endif // iplugin_hpp_included
+#endif // IPLUGIN_HPP_INCLUDED

@@ -1,6 +1,6 @@
 /** \file time.hpp */
-#ifndef time_hpp_included
-#define time_hpp_included
+#ifndef TIME_HPP_INCLUDED
+#define TIME_HPP_INCLUDED
 
 #include <thread>
 #include <chrono>
@@ -103,4 +103,4 @@ namespace micro {
 
 } // namespace micro
 
-#endif // time_hpp_included
+#endif // TIME_HPP_INCLUDED

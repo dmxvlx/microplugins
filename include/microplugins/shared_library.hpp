@@ -1,6 +1,6 @@
 /** \file shared_library.hpp */
-#ifndef shared_library_hpp_included
-#define shared_library_hpp_included
+#ifndef SHARED_LIBRARY_HPP_INCLUDED
+#define SHARED_LIBRARY_HPP_INCLUDED
 
 #include <functional>
 #include <regex>
@@ -204,4 +204,4 @@ namespace micro {
 
 } // namespace micro
 
-#endif // shared_library_hpp_included
+#endif // SHARED_LIBRARY_HPP_INCLUDED

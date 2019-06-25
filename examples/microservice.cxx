@@ -1,7 +1,8 @@
-#ifndef microservice_cxx
-#define microservice_cxx
+#ifndef MICROSERVICE_CXX
+#define MICROSERVICE_CXX
 
 #include "plugins.hpp"
+
 #include <csignal>
 
 
@@ -68,4 +69,4 @@ int main(/*int argc, char* argv[]*/) {
   return plugins->error();
 }
 
-#endif // microservice_cxx
+#endif // MICROSERVICE_CXX

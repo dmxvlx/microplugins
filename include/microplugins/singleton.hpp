@@ -1,6 +1,6 @@
 /** \file singleton.hpp */
-#ifndef singleton_hpp_included
-#define singleton_hpp_included
+#ifndef SINGLETON_HPP_INCLUDED
+#define SINGLETON_HPP_INCLUDED
 
 #include <memory>
 #include <mutex>
@@ -89,4 +89,4 @@ namespace micro {
 
 } // namespace micro
 
-#endif // singleton_hpp_included
+#endif // SINGLETON_HPP_INCLUDED

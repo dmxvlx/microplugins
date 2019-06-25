@@ -1,8 +1,9 @@
 /** \file task.hpp */
-#ifndef task_hpp_included
-#define task_hpp_included
+#ifndef TASK_HPP_INCLUDED
+#define TASK_HPP_INCLUDED
 
 #include "time.hpp"
+
 #include <future>
 #include <functional>
 #include <any>
@@ -162,4 +163,4 @@ namespace micro {
 
 } // namespace micro
 
-#endif // task_hpp_included
+#endif // TASK_HPP_INCLUDED
