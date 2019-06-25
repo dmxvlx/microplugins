@@ -11,6 +11,10 @@
 #include <type_traits>
 #include <limits> // std::numeric_limits
 
+#ifndef MAX_PLUGINS_ARGS
+#define MAX_PLUGINS_ARGS 6
+#endif
+
 namespace micro {
 
   /**
@@ -73,7 +77,7 @@ namespace micro {
 
     /** \returns Shared future for result task called. \param[in] arg arguments for task */
     template<typename... Args>
-    std::shared_future<std::any> run(Args&&... args) {
+    inline std::shared_future<std::any> run(Args&&... args) {
       if (is_once_ || !fn_) { return {}; }
       else {
         clock_ = micro::now();
@@ -83,7 +87,7 @@ namespace micro {
 
     /** \returns Shared future for result task called once. \param[in] arg arguments for task */
     template<typename... Args>
-    std::shared_future<std::any> run_once(Args&&... args) {
+    inline std::shared_future<std::any> run_once(Args&&... args) {
       if (is_once_ || !fn_) { return {}; }
       else {
         is_once_ = true;
@@ -94,13 +98,13 @@ namespace micro {
 
     /** \see run(std::forward<Args>(args)...) */
     template<typename... Args>
-    std::shared_future<std::any> operator()(Args&&... args) { return run(std::forward<Args>(args)...); }
+    inline std::shared_future<std::any> operator()(Args&&... args) { return run(std::forward<Args>(args)...); }
 
     /** \returns True if name of task 'service' and numbers of args is 1. */
-    bool is_service() const { return (max_args() == 1 && name_ == "service"); }
+    inline bool is_service() const { return (max_args() == 1 && name_ == "service"); }
 
     /** \returns True if task was called once. \see run_once(std::forward<Args>(args)...) */
-    bool is_once() const { return is_once_; }
+    inline bool is_once() const { return is_once_; }
 
     /** Clears once flag. \see run_once(std::forward<Args>(args)...), is_once() */
     void clear_once() { is_once_ = false; }
@@ -118,7 +122,7 @@ namespace micro {
     void help(const std::string& hlp) { help_ = hlp; }
 
     /** \returns Idle for task in minutes */
-    int idle()  const { return micro::duration<micro::minutes>(clock_, micro::now()); }
+    inline int idle()  const { return micro::duration<micro::minutes>(clock_, micro::now()); }
 
     /** Resets pointer to function. */
     void reset() { fn_ = nullptr; }

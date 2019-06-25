@@ -74,18 +74,18 @@ namespace micro {
 
     /** \returns Shared future for result of called task. \param[in] nm index or name of task \param[in] arg arguments for task \see task::run(std::forward<Args>(args)...), operator[](const std::string& nm), operator[](int i) */
     template<typename T, typename... Args>
-    std::shared_future<std::any> operator()(const T& nm, Args&&... args) {
+    inline std::shared_future<std::any> operator()(const T& nm, Args&&... args) {
       return (*this)[nm](std::forward<Args>(args)...);
     }
 
     /** \returns Number of tasks in container */
-    std::size_t count() const { return std::size(subscribers_); }
+    inline std::size_t count() const { return std::size(subscribers_); }
 
     /** \returns True if container has task. \param[in] nm name of task */
-    bool has(const std::string& nm) const { return (subscribers_.find(nm) != subscribers_.end()); }
+    inline bool has(const std::string& nm) const { return (subscribers_.find(nm) != subscribers_.end()); }
 
     /** \returns True if container has task. \param[in] i index of task */
-    bool has(std::size_t i) const { return (i < std::size(subscribers_)); }
+    inline bool has(std::size_t i) const { return (i < std::size(subscribers_)); }
 
     /** Clears once-flag for all tasks in container \see task::clear_once(), task::is_once() */
     void clear_once() {
@@ -95,7 +95,7 @@ namespace micro {
     }
 
     /** \returns Minimum Idle for all tasks in container. \see task::idle() */
-    int idle() const {
+    inline int idle() const {
       int ret = std::numeric_limits<int>::max(), current_idle = 0;
       for (auto it = std::cbegin(subscribers_); it != std::cend(subscribers_); ++it) {
         if ((current_idle = it->second->idle()) < ret && !(ret = current_idle)) { return ret; }
@@ -122,19 +122,19 @@ namespace micro {
     }
 
     /** \returns Const reference to task. \param[in] nm name of task in container */
-    task<Ts...>& operator[](const std::string& nm) const {
+    inline task<Ts...>& operator[](const std::string& nm) const {
       if (auto it = subscribers_.find(nm); it != std::cend(subscribers_)) { return *it->second.get(); }
       else { return empty_task_; }
     }
 
     /** \returns Reference to task. \param[in] nm name of task in container */
-    task<Ts...>& operator[](const std::string& nm) {
+    inline task<Ts...>& operator[](const std::string& nm) {
       if (auto it = subscribers_.find(nm); it != std::end(subscribers_)) { return *it->second.get(); }
       else { return empty_task_; }
     }
 
     /** \returns Const reference to task. \param[in] i index of task in container */
-    task<Ts...>& operator[](std::size_t i) const {
+    inline task<Ts...>& operator[](std::size_t i) const {
       if (i < std::size(subscribers_)) {
         for (auto it = std::cbegin(subscribers_); it != std::cend(subscribers_); ++it) {
           if (!i--) { return *it->second.get(); }
@@ -143,7 +143,7 @@ namespace micro {
     }
 
     /** \returns Reference to task. \param[in] i index of task in container */
-    task<Ts...>& operator[](std::size_t i) {
+    inline task<Ts...>& operator[](std::size_t i) {
       if (i < std::size(subscribers_)) {
         for (auto it = std::begin(subscribers_); it != std::end(subscribers_); ++it) {
           if (!i--) { return *it->second.get(); }

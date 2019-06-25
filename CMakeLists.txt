@@ -6,7 +6,7 @@ project(microplugins CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(microplugins_VERSION_MAJOR 1)
+set(microplugins_VERSION_MAJOR 2)
 set(microplugins_VERSION_MINOR 0)
 
 if(WIN32)
@@ -15,6 +15,10 @@ if(WIN32)
 else()
   set(CXXFLAGS -O2 -s -Wall -Wextra)
   set(LDLIBS dl pthread stdc++fs)
+endif()
+
+if(MAX_PLUGINS_ARGS)
+  add_definitions(-DMAX_PLUGINS_ARGS=${MAX_PLUGINS_ARGS})
 endif()
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/include/microplugins)

@@ -12,15 +12,15 @@
 
 [[maybe_unused]] static std::any service(std::any a1) {
   // for the service task in plugins, first argument is pointer to the plugin
-  std::shared_ptr<micro::iplugin> self = std::any_cast<std::shared_ptr<micro::iplugin>>(a1);
-  std::shared_ptr<micro::iplugins> manager = self->get_plugins();
+  std::shared_ptr<micro::iplugin<>> self = std::any_cast<std::shared_ptr<micro::iplugin<>>>(a1);
+  std::shared_ptr<micro::iplugins<>> manager = self->get_plugins();
 
   std::clog << "kernel version: " << manager->major() << "." << manager->minor() << std::endl;
   std::clog << "kernel name: " << manager->name() << std::endl;
 
   // do work while plugin's service in actived mode (managed by manager)
   while (self->is_run()) {
-    std::shared_ptr<micro::iplugin> other_plugin = manager->get_plugin("other_plugin");
+    std::shared_ptr<micro::iplugin<>> other_plugin = manager->get_plugin("other_plugin");
 
     if (other_plugin) {
       // do things with newly loaded plugin from the manager (or do any calculations)
@@ -71,10 +71,10 @@ static std::any sum2(std::any a1, std::any a2) {
 
 
 // our class plugin
-class plugin1 final : public micro::iplugin, public std::enable_shared_from_this<plugin1> {
+class plugin1 final : public micro::iplugin<>, public std::enable_shared_from_this<plugin1> {
 public:
 
-  plugin1(int v, const std::string& nm):micro::iplugin(v, nm),
+  plugin1(int v, const std::string& nm):micro::iplugin<>(v, nm),
   std::enable_shared_from_this<plugin1>() {
 
     // warning: in this moment, plugin has no manager in micro::iplugin::plugins_ !
@@ -100,8 +100,8 @@ public:
 
   ~plugin1() override {}
 
-  std::shared_ptr<micro::iplugin> get_shared_ptr() override {
-    return std::shared_ptr<micro::iplugin>(shared_from_this());
+  std::shared_ptr<micro::iplugin<>> get_shared_ptr() override {
+    return std::shared_ptr<micro::iplugin<>>(shared_from_this());
   }
 
   std::any method1(std::any a1) {
@@ -117,7 +117,7 @@ static std::shared_ptr<plugin1> instance = nullptr;
 
 
 // extern function, that declared in "iplugin.hpp", for export the plugin from dll
-std::shared_ptr<micro::iplugin> import_plugin() {
+std::shared_ptr<micro::iplugin<>> import_plugin() {
   return instance ? instance : (instance = std::make_shared<plugin1>(micro::make_version(1,0), "plugin1"));
 }
 

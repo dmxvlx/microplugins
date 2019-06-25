@@ -21,30 +21,40 @@ namespace micro {
     \copyright Boost Software License - Version 1.0
 
     All plugins inherits from this class. It is container for tasks.
+
     All tasks has returning and arguments type is std::any.
-    Maximum arguments for tasks is 6, minimum is 0. You can change it for your needs
-    by adding/removing elements into/from the `tasks_' tuple.
+
+    Maximum arguments for tasks is 6, minimum is 0.
+
+    You can change it for your needs by defining constant with cmake while configure:
+
+    > ~/build $ cmake -DMAX_PLUGINS_ARGS=2 ../
 
     \see subscribe(const std::string& nm, const T& t, const std::string& hlp), unsubscribe(T nm)
   */
+  template<std::size_t L = MAX_PLUGINS_ARGS>
   class storage {
   private:
 
-    friend class plugins;
+    template<std::size_t> friend class plugins;
 
     mutable std::shared_mutex mtx_;
     int version_;
     std::string name_;
 
-    std::tuple<
-      tasks<>, // <0>
-      tasks<std::any>, // <1>
-      tasks<std::any,std::any>, // <2>
-      tasks<std::any,std::any,std::any>, // <3>
-      tasks<std::any,std::any,std::any,std::any>, // <4>
-      tasks<std::any,std::any,std::any,std::any,std::any>, // <5>
-      tasks<std::any,std::any,std::any,std::any,std::any,std::any> // <6>
-    > tasks_;
+    template<typename T, unsigned N, typename... Args>
+    struct gen_task_type { using type = typename gen_task_type<T, N-1, T, Args...>::type; };
+
+    template<typename T, typename... Args>
+    struct gen_task_type<T, 0, Args...> { using type = tasks<Args...>; };
+
+    template<typename T, std::size_t N, typename... Args>
+    struct gen_storage_type { using type = typename gen_storage_type<T, N-1, typename gen_task_type<T, N>::type, Args...>::type; };
+
+    template<typename T, typename... Args>
+    struct gen_storage_type<T, 0, Args...> { using type = std::tuple<typename gen_task_type<T, 0>::type, Args...>; };
+
+    typename gen_storage_type<std::any, L>::type tasks_;
 
   protected:
 
@@ -54,6 +64,7 @@ namespace micro {
     /** Adds task into storage for given number arguments in I. \param[in] nm name of task \param[in] t function/method/lambda \param[in] hlp message help for task */
     template<std::size_t I, typename T>
     void subscribe(const std::string& nm, const T& t, const std::string& hlp = {}) {
+      static_assert(I < std::tuple_size_v<std::decay_t<decltype(tasks_)>>, "\n\nOut of range for valid number arguments of plugin's function. \nPlease, set it to larger value by: /path/to/build $ cmake -DMAX_PLUGINS_ARGS=12 ../ or what you need...\n");
       std::unique_lock<std::shared_mutex> lock(mtx_);
       if constexpr (I < std::tuple_size_v<std::decay_t<decltype(tasks_)>>) {
         std::get<I>(tasks_).subscribe(nm, t, hlp);
@@ -73,7 +84,7 @@ namespace micro {
 
     /** Runs task once for given number arguments in I. \param[in] nm index or name of task \param[in] args arguments for task \returns Shared future for result \see std::shared_future, std::any, std::async */
     template<std::size_t I, typename T, typename... Args>
-    std::shared_future<std::any> run_once(const T& nm, Args&&... args) {
+    inline std::shared_future<std::any> run_once(const T& nm, Args&&... args) {
       std::shared_lock<std::shared_mutex> lock(mtx_);
       if constexpr (I < std::tuple_size_v<std::decay_t<decltype(tasks_)>>) {
         return std::get<I>(tasks_)[nm].run_once(std::forward<Args>(args)...);
@@ -107,7 +118,7 @@ namespace micro {
 
     /** Runs task if it is not once-called for given number arguments in I. \param[in] nm index or name of task \param[in] args arguments for task \returns Shared future for result \see std::shared_future, std::any, std::async */
     template<std::size_t I, typename T, typename... Args>
-    std::shared_future<std::any> run(const T& nm, Args&&... args) {
+    inline std::shared_future<std::any> run(const T& nm, Args&&... args) {
       std::shared_lock<std::shared_mutex> lock(mtx_);
       if constexpr (I < std::tuple_size_v<std::decay_t<decltype(tasks_)>>) {
         return std::get<I>(tasks_)[nm](std::forward<Args>(args)...);
@@ -116,7 +127,7 @@ namespace micro {
 
     /** \returns Amount tasks in storage for given number arguments in I. */
     template<std::size_t I>
-    std::size_t count() const {
+    inline std::size_t count() const {
       std::shared_lock<std::shared_mutex> lock(mtx_);
       if constexpr (I < std::tuple_size_v<std::decay_t<decltype(tasks_)>>) {
         return std::get<I>(tasks_).count();
@@ -125,7 +136,7 @@ namespace micro {
 
     /** \returns True if tasks in storage has task for given number arguments in I. \param[in] nm index or name of task */
     template<std::size_t I, typename T>
-    bool has(const T& nm) const {
+    inline bool has(const T& nm) const {
       std::shared_lock<std::shared_mutex> lock(mtx_);
       if constexpr (I < std::tuple_size_v<std::decay_t<decltype(tasks_)>>) {
         return std::get<I>(tasks_).has(nm);
@@ -134,7 +145,7 @@ namespace micro {
 
     /** \returns True if tasks in storage has onced-flag for given number arguments in I. \param[in] nm index or name of task */
     template<std::size_t I, typename T>
-    bool is_once(const T& nm) const {
+    inline bool is_once(const T& nm) const {
       std::shared_lock<std::shared_mutex> lock(mtx_);
       if constexpr (I < std::tuple_size_v<std::decay_t<decltype(tasks_)>>) {
         return std::get<I>(tasks_)[nm].is_once();
@@ -161,7 +172,7 @@ namespace micro {
 
     /** \returns Idle(in minutes) for task in storage for given number arguments in I. \param[in] nm index or name of task */
     template<std::size_t I, typename T>
-    int idle(const T& nm) const {
+    inline int idle(const T& nm) const {
       std::shared_lock<std::shared_mutex> lock(mtx_);
       if constexpr (I < std::tuple_size_v<std::decay_t<decltype(tasks_)>>) {
         return std::get<I>(tasks_)[nm].idle();
@@ -170,7 +181,7 @@ namespace micro {
 
     /** \returns Idle(in minutes) for all tasks in storage for given number arguments in I. */
     template<std::size_t I>
-    int idle() const {
+    inline int idle() const {
       std::shared_lock<std::shared_mutex> lock(mtx_);
       if constexpr (I < std::tuple_size_v<std::decay_t<decltype(tasks_)>>) {
         return std::get<I>(tasks_).idle();
@@ -178,7 +189,7 @@ namespace micro {
     }
 
     /** \returns Idle(in minutes) for all tasks in storage. */
-    int idle() const {
+    inline int idle() const {
       int ret = std::numeric_limits<int>::max(), current_idle = 0;
       if ((current_idle = idle<0>()) < ret && !(ret = current_idle)) { return ret; }
       if ((current_idle = idle<1>()) < ret && !(ret = current_idle)) { return ret; }

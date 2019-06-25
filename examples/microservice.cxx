@@ -7,10 +7,10 @@
 
 static std::any service(std::any a1) {
   int ret = 0;
-  std::shared_ptr<micro::plugins> manager = std::any_cast<std::shared_ptr<micro::plugins>>(a1);
+  std::shared_ptr<micro::plugins<>> manager = std::any_cast<std::shared_ptr<micro::plugins<>>>(a1);
   // we can do loop while manager->is_run() - for real service ...
   if (manager->is_run()) {
-    std::shared_ptr<micro::iplugin> plugin1 = manager->get_plugin("plugin1");
+    std::shared_ptr<micro::iplugin<>> plugin1 = manager->get_plugin("plugin1");
     if (plugin1) {
       std::clog << "plugin1 is loaded ..." << std::endl;
 
@@ -39,19 +39,22 @@ static std::any service(std::any a1) {
 
 // signal handler
 static void signal_handler(int s) {
-  micro::plugins::get()->stop();
+  micro::plugins<>::get()->stop();
   std::exit(s);
 }
 
 
 int main(/*int argc, char* argv[]*/) {
+
+  std::clog << "MAX_PLUGINS_ARGS: " << MAX_PLUGINS_ARGS << std::endl;
+
   std::signal(SIGABRT, &signal_handler);
   std::signal(SIGTERM, &signal_handler);
   std::signal(SIGKILL, &signal_handler);
   std::signal(SIGQUIT, &signal_handler);
   std::signal(SIGINT, &signal_handler);
 
-  std::shared_ptr<micro::plugins> plugins = micro::plugins::get(); // create instance
+  std::shared_ptr<micro::plugins<>> plugins = micro::plugins<>::get(); // create instance
   plugins->subscribe<1>("service", service); // service task is optionally
 
   // set max idle to 3 minutes - if no one task will not called in that period,

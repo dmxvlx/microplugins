@@ -35,7 +35,7 @@
 
   # Installation
   Compiling:
-  > $ mkdir build && cd build && cmake .. && make
+  > $ mkdir build && cd build && cmake -DMAX_PLUGINS_ARGS=8 .. && make
 
   Installation:
   > $ make install
@@ -120,10 +120,11 @@ namespace micro {
 
     \example microservice.cxx
   */
-  class plugins final : public iplugins, public singleton<plugins>, public std::enable_shared_from_this<plugins> {
+  template<std::size_t L = MAX_PLUGINS_ARGS>
+  class plugins final : public iplugins<L>, public singleton<plugins<L>>, public std::enable_shared_from_this<plugins<L>> {
   private:
 
-    friend class singleton<plugins>;
+    friend class singleton<plugins<L>>;
 
     std::atomic<bool> do_work_, expiry_;
     std::atomic<int> error_, max_idle_;
@@ -133,7 +134,7 @@ namespace micro {
       std::string,
       std::tuple<
         std::shared_ptr<shared_library>,
-        std::shared_ptr<iplugin>
+        std::shared_ptr<iplugin<L>>
       >
     > plugins_;
 
@@ -147,19 +148,22 @@ namespace micro {
       \see singleton::get(Ts&&... args), storage::storage(int v, const std::string& nm), storage::version(), storage::name()
     */
     explicit plugins(int v = make_version(1,0), const std::string& nm = "microplugins service", const std::string& path0 = "microplugins"):
-    iplugins(v, nm),singleton<plugins>(),std::enable_shared_from_this<plugins>(),
+    iplugins<L>(v, nm),singleton<plugins<L>>(),std::enable_shared_from_this<plugins<L>>(),
     do_work_(false),expiry_(true),error_(0),max_idle_(10),path_(path0),plugins_() {}
 
   public:
 
     /** \see storage::subscribe(const std::string& nm, const T& t, const std::string& hlp) */
-    using storage::subscribe;
+    using storage<L>::subscribe;
 
-    /** \see storage::unsubscribe(T nm) */
-    using storage::unsubscribe;
+    /** \see storage::unsubscribe(const T& nm) */
+    using storage<L>::unsubscribe;
 
-    /** \see storage::run_once(T nm, Ts2&&... args) */
-    using storage::run_once;
+    /** \see storage::run_once(const T& nm, Ts2&&... args) */
+    using storage<L>::run_once;
+
+    /** \see storage::has(const T& nm) */
+    using storage<L>::has;
 
     plugins& operator=(const plugins& rhs) = delete;
 
@@ -168,8 +172,8 @@ namespace micro {
     ~plugins() override { stop(); }
 
     /** \returns Shared pointer to interface. \see iplugins::iplugins(int v, const std::string& nm), storage::storage(int v, const std::string& nm) */
-    std::shared_ptr<iplugins> get_shared_ptr() override {
-      return std::shared_ptr<iplugins>(shared_from_this());
+    std::shared_ptr<iplugins<>> get_shared_ptr() override {
+      return std::shared_ptr<iplugins<>>(plugins<>::shared_from_this());
     }
 
     /** \returns State of plugins kernel. \see run() */
@@ -186,51 +190,51 @@ namespace micro {
 
     /** Runs thread for manage plugins. If plugins kernel has task with name `service' it will called once. \see is_run() */
     void run() {
-      std::unique_lock<std::shared_mutex> lock(mtx_);
+      std::unique_lock<std::shared_mutex> lock(plugins<>::mtx_);
       if (do_work_) { return; }
       error_ = 0;
       do_work_ = true;
       expiry_ = false;
-      std::thread(&plugins::loop_cb, shared_from_this(), shared_from_this()).detach();
-      std::thread(&plugins::service_cb, shared_from_this(), shared_from_this()).detach();
+      std::thread(&plugins<>::loop_cb, plugins<>::shared_from_this(), plugins<>::shared_from_this()).detach();
+      std::thread(&plugins<>::service_cb, plugins<>::shared_from_this(), plugins<>::shared_from_this()).detach();
     }
 
     /** Stops thread of management plugins. \see run(), is_run() */
     void stop() {
-      std::unique_lock<std::shared_mutex> lock(mtx_);
+      std::unique_lock<std::shared_mutex> lock(plugins<>::mtx_);
       if (!do_work_) { return; }
       do_work_ = false;
       while (!expiry_) { micro::sleep<micro::milliseconds>(50); }
       unload_plugins();
-      clear_once();
+      plugins<>::clear_once();
     }
 
     /** \returns Amount of loaded plugins in this moment. \see iplugins::count_plugins() */
     std::size_t count_plugins() const override {
-      std::shared_lock<std::shared_mutex> lock(mtx_);
+      std::shared_lock<std::shared_mutex> lock(plugins<>::mtx_);
       return do_work_ ? std::size(plugins_) : 0;
     }
 
     /** \returns Shared pointer to plugin. \param[in] nm name of plugin \see iplugins::get_plugin(const std::string& nm) */
-    std::shared_ptr<iplugin> get_plugin(const std::string& nm) override {
-      std::unique_lock<std::shared_mutex> lock(mtx_);
+    std::shared_ptr<iplugin<>> get_plugin(const std::string& nm) override {
+      std::unique_lock<std::shared_mutex> lock(plugins<>::mtx_);
       if (!do_work_) { return nullptr; }
       // search in loaded dll's
       if (auto it = plugins_.find(nm); it != std::end(plugins_)) { return std::get<1>(it->second); }
       // try to load dll from system
-      std::shared_ptr<iplugin> ret = nullptr;
+      std::shared_ptr<iplugin<>> ret = nullptr;
       if (auto dll = std::make_shared<shared_library>(nm, path_); dll && dll->is_loaded()) {
         if (auto loader = dll->get<import_plugin_cb_t>("import_plugin"); loader && (ret = loader())) {
           ret->plugins_ = get_shared_ptr();
           plugins_[nm] = {dll, ret};
-          std::thread(&plugins::service_plugin_cb, shared_from_this(), ret).detach();
+          std::thread(&plugins<>::service_plugin_cb, plugins<>::shared_from_this(), ret).detach();
         }
       } return ret;
     }
 
     /** \returns Shared pointer to plugin. \param[in] i index of plugin \see count_plugins(), iplugins::get_plugin(int i) */
-    std::shared_ptr<iplugin> get_plugin(std::size_t i) override {
-      std::shared_lock<std::shared_mutex> lock(mtx_);
+    std::shared_ptr<iplugin<L>> get_plugin(std::size_t i) override {
+      std::shared_lock<std::shared_mutex> lock(plugins<>::mtx_);
       if (do_work_ && i < std::size(plugins_)) {
         for (auto it = std::begin(plugins_); it != std::end(plugins_); ++it) {
           if (!i--) { return std::get<1>(it->second); }
@@ -240,7 +244,7 @@ namespace micro {
 
     /** Unloads plugin. \param[in] nm name of plugin */
     void unload_plugin(const std::string& nm) {
-      std::unique_lock<std::shared_mutex> lock(mtx_);
+      std::unique_lock<std::shared_mutex> lock(plugins<>::mtx_);
       if (!do_work_) { return; }
       if (auto it = plugins_.find(nm); it != std::end(plugins_)) {
         if (std::get<1>(it->second)->do_work_) { std::get<1>(it->second)->do_work_ = false; }
@@ -253,7 +257,7 @@ namespace micro {
 
     /** Unloads plugin. \param[in] i index of plugin \see count_plugins() */
     void unload_plugin(std::size_t i) {
-      std::unique_lock<std::shared_mutex> lock(mtx_);
+      std::unique_lock<std::shared_mutex> lock(plugins<>::mtx_);
       if (do_work_ && i < std::size(plugins_)) {
         for (auto it = std::begin(plugins_); it != std::end(plugins_); ++it) {
           if (!i--) {
@@ -270,25 +274,25 @@ namespace micro {
 
   private:
 
-    void service_plugin_cb(std::shared_ptr<iplugin> pl) {
+    void service_plugin_cb(std::shared_ptr<iplugin<>> pl) {
       if (!pl->has<1>("service")) { return; }
       std::shared_future<std::any> r;
       pl->do_work_ = true;
-      r = std::get<1>(pl->tasks_)["service"].run_once(std::make_any<std::shared_ptr<iplugin>>(pl));
+      r = std::get<1>(pl->tasks_)["service"].run_once(std::make_any<std::shared_ptr<iplugin<>>>(pl));
       r.wait();
     }
 
-    void service_cb(std::shared_ptr<plugins> k) {
+    void service_cb(std::shared_ptr<plugins<>> k) {
       if (!k->has<1>("service")) { return; }
       std::shared_future<std::any> r;
-      r = std::get<1>(k->tasks_)["service"].run_once(std::make_any<std::shared_ptr<plugins>>(k));
+      r = std::get<1>(k->tasks_)["service"].run_once(std::make_any<std::shared_ptr<plugins<>>>(k));
       r.wait();
       if (r.valid() && r.get().has_value() && r.get().type() == typeid(int)) {
         k->error_ = std::any_cast<int>(r.get());
       } else { k->error_ = -1; }
     }
 
-    void loop_cb(std::shared_ptr<plugins> k) {
+    void loop_cb(std::shared_ptr<plugins<>> k) {
       micro::clock_t last_check = micro::now();
       while (k->do_work_) {
         if (micro::duration<micro::milliseconds>(last_check, micro::now()) >= 500) {
