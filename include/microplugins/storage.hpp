@@ -125,7 +125,7 @@ namespace micro {
 
     /** \returns True if tasks in storage has task for given number arguments in I. \param[in] nm index or name of task */
     template<std::size_t I, typename T>
-    bool has(T nm) const {
+    bool has(const T& nm) const {
       std::shared_lock<std::shared_mutex> lock(mtx_);
       if constexpr (I < std::tuple_size_v<std::decay_t<decltype(tasks_)>>) {
         return std::get<I>(tasks_).has(nm);
@@ -134,7 +134,7 @@ namespace micro {
 
     /** \returns True if tasks in storage has onced-flag for given number arguments in I. \param[in] nm index or name of task */
     template<std::size_t I, typename T>
-    bool is_once(T nm) const {
+    bool is_once(const T& nm) const {
       std::shared_lock<std::shared_mutex> lock(mtx_);
       if constexpr (I < std::tuple_size_v<std::decay_t<decltype(tasks_)>>) {
         return std::get<I>(tasks_)[nm].is_once();
@@ -143,7 +143,7 @@ namespace micro {
 
     /** \returns Name of task in storage for given number arguments in I. \param[in] nm index or name of task */
     template<std::size_t I, typename T>
-    std::string name(T nm) const {
+    std::string name(const T& nm) const {
       std::shared_lock<std::shared_mutex> lock(mtx_);
       if constexpr (I < std::tuple_size_v<std::decay_t<decltype(tasks_)>>) {
         return std::get<I>(tasks_)[nm].name();
@@ -152,7 +152,7 @@ namespace micro {
 
     /** \returns Message help for task in storage for given number arguments in I. \param[in] nm index or name of task */
     template<std::size_t I, typename T>
-    std::string help(T nm) const {
+    std::string help(const T& nm) const {
       std::shared_lock<std::shared_mutex> lock(mtx_);
       if constexpr (I < std::tuple_size_v<std::decay_t<decltype(tasks_)>>) {
         return std::get<I>(tasks_)[nm].help();
@@ -161,7 +161,7 @@ namespace micro {
 
     /** \returns Idle(in minutes) for task in storage for given number arguments in I. \param[in] nm index or name of task */
     template<std::size_t I, typename T>
-    int idle(T nm) const {
+    int idle(const T& nm) const {
       std::shared_lock<std::shared_mutex> lock(mtx_);
       if constexpr (I < std::tuple_size_v<std::decay_t<decltype(tasks_)>>) {
         return std::get<I>(tasks_)[nm].idle();
