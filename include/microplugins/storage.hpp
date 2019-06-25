@@ -67,7 +67,7 @@ namespace micro {
       if constexpr (I < std::tuple_size_v<std::decay_t<decltype(tasks_)>>) {
         if (std::get<I>(tasks_)[nm].is_service() && std::get<I>(tasks_)[nm].is_once()) {
           return;
-        } else std::get<I>(tasks_).unsubscribe(nm);
+        } else { std::get<I>(tasks_).unsubscribe(nm); }
       }
     }
 
@@ -77,7 +77,7 @@ namespace micro {
       std::shared_lock<std::shared_mutex> lock(mtx_);
       if constexpr (I < std::tuple_size_v<std::decay_t<decltype(tasks_)>>) {
         return std::get<I>(tasks_)[nm].run_once(args...);
-      } else return {};
+      } else { return {}; }
     }
 
     /** Clears once flag in all tasks of this container. \see clear_once_impl(T& tasks_) */
