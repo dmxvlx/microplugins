@@ -155,16 +155,16 @@ namespace micro {
   public:
 
     /** \see storage::subscribe(const std::string& nm, const T& t, const std::string& hlp) */
-    using storage<L>::subscribe;
+    using storage<>::subscribe;
 
     /** \see storage::unsubscribe(const T& nm) */
-    using storage<L>::unsubscribe;
+    using storage<>::unsubscribe;
 
-    /** \see storage::run_once(const T& nm, Ts2&&... args) */
-    using storage<L>::run_once;
+    /** \see storage::run_once(const T& nm, Args&&... args) */
+    using storage<>::run_once;
 
     /** \see storage::has(const T& nm) */
-    using storage<L>::has;
+    using storage<>::has;
 
     plugins& operator=(const plugins& rhs) = delete;
 
