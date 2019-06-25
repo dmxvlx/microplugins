@@ -73,10 +73,10 @@ namespace micro {
 
     /** Runs task once for given number arguments in I. \param[in] nm index or name of task \param[in] args arguments for task \returns Shared future for result \see std::shared_future, std::any, std::async */
     template<std::size_t I, typename T, typename... Args>
-    std::shared_future<std::any> run_once(T nm, Args&&... args) {
+    std::shared_future<std::any> run_once(const T& nm, Args&&... args) {
       std::shared_lock<std::shared_mutex> lock(mtx_);
       if constexpr (I < std::tuple_size_v<std::decay_t<decltype(tasks_)>>) {
-        return std::get<I>(tasks_)[nm].run_once(args...);
+        return std::get<I>(tasks_)[nm].run_once(std::forward<Args>(args)...);
       } else { return {}; }
     }
 
@@ -107,10 +107,10 @@ namespace micro {
 
     /** Runs task if it is not once-called for given number arguments in I. \param[in] nm index or name of task \param[in] args arguments for task \returns Shared future for result \see std::shared_future, std::any, std::async */
     template<std::size_t I, typename T, typename... Args>
-    std::shared_future<std::any> run(T nm, Args&&... args) {
+    std::shared_future<std::any> run(const T& nm, Args&&... args) {
       std::shared_lock<std::shared_mutex> lock(mtx_);
       if constexpr (I < std::tuple_size_v<std::decay_t<decltype(tasks_)>>) {
-        return std::get<I>(tasks_)[nm](args...);
+        return std::get<I>(tasks_)[nm](std::forward<Args>(args)...);
       } else { return {}; }
     }
 
