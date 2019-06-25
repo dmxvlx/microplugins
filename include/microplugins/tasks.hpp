@@ -3,7 +3,7 @@
 #define tasks_hpp_included
 
 #include "task.hpp"
-#include <unordered_map>
+#include <map>
 
 namespace micro {
 
@@ -35,11 +35,7 @@ namespace micro {
   class tasks final {
   private:
 
-    using map_t = std::unordered_map<std::string, std::shared_ptr<task<Ts...>>>;
-    using iterator_t = typename std::unordered_map<std::string, std::shared_ptr<task<Ts...>>>::iterator;
-    using const_iterator_t = typename std::unordered_map<std::string, std::shared_ptr<task<Ts...>>>::const_iterator;
-
-    map_t subscribers_;
+    std::map<std::string, std::shared_ptr<task<Ts...>>> subscribers_;
     task<Ts...> empty_task_; // for out of range access by operator[]
 
   public:
@@ -57,20 +53,20 @@ namespace micro {
 
     /** Adds task into container. \param[in] nm name of task \param[in] t function/method/lambda \param[in] hlp message help for task */
     void subscribe(const std::string& nm, const decltype(std::function<std::any(Ts...)>()) &t, const std::string& hlp = {}) {
-      if (nm.empty() || subscribers_.find(nm) != subscribers_.end() || !t) return;
-      subscribers_[nm] = std::make_shared<task<Ts...>>(nm, t, hlp);
+      if (!std::empty(nm) && subscribers_.find(nm) == std::end(subscribers_) && !!t) {
+        subscribers_[nm] = std::make_shared<task<Ts...>>(nm, t, hlp);
+      }
     }
 
     /** Removes task from container. \param[in] nm name of task */
     void unsubscribe(const std::string& nm) {
-      iterator_t it = subscribers_.find(nm);
-      if (it != subscribers_.end()) subscribers_.erase(it);
+      if (auto it = subscribers_.find(nm); it != std::end(subscribers_)) { subscribers_.erase(it); }
     }
 
     /** Removes task from container. \param[in] i index of task */
     void unsubscribe(std::size_t i) {
       if (i < subscribers_.size()) {
-        for (iterator_t it = subscribers_.begin(); it != subscribers_.end(); ++it) {
+        for (auto it = std::begin(subscribers_); it != std::end(subscribers_); ++it) {
           if (!i--) { subscribers_.erase(it); break; }
         }
       }
@@ -83,23 +79,17 @@ namespace micro {
     }
 
     /** \returns Number of tasks in container */
-    std::size_t count() const {
-      return subscribers_.size();
-    }
+    std::size_t count() const { return std::size(subscribers_); }
 
     /** \returns True if container has task. \param[in] nm name of task */
-    bool has(const std::string& nm) const {
-      return (subscribers_.find(nm) != subscribers_.end());
-    }
+    bool has(const std::string& nm) const { return (subscribers_.find(nm) != subscribers_.end()); }
 
     /** \returns True if container has task. \param[in] i index of task */
-    bool has(std::size_t i) const {
-      return (i < subscribers_.size());
-    }
+    bool has(std::size_t i) const { return (i < std::size(subscribers_)); }
 
     /** Clears once-flag for all tasks in container \see task::clear_once(), task::is_once() */
     void clear_once() {
-      for (iterator_t it = subscribers_.begin(); it != subscribers_.end(); ++it) {
+      for (auto it = std::begin(subscribers_); it != std::end(subscribers_); ++it) {
         it->second->clear_once();
       }
     }
@@ -107,60 +97,58 @@ namespace micro {
     /** \returns Minimum Idle for all tasks in container. \see task::idle() */
     int idle() const {
       int ret = std::numeric_limits<int>::max(), current_idle = 0;
-      for (const_iterator_t it = subscribers_.cbegin(); it != subscribers_.cend(); ++it) {
-        if ((current_idle = it->second->idle()) < ret && !(ret = current_idle)) return ret;
+      for (auto it = std::cbegin(subscribers_); it != std::cend(subscribers_); ++it) {
+        if ((current_idle = it->second->idle()) < ret && !(ret = current_idle)) { return ret; }
       } return ret;
     }
 
     /** Resets all tasks in container. \see task::reset() */
     void reset() {
-      for (iterator_t it = subscribers_.begin(); it != subscribers_.end(); ++it) {
+      for (auto it = std::begin(subscribers_); it != std::end(subscribers_); ++it) {
         it->second->reset();
       }
     }
 
     /** Copyable assignment. \param[in] rhs tasks for copying */
     tasks<Ts...>& operator=(const tasks<Ts...>& rhs) {
-      if (this != &rhs) subscribers_ = rhs.subscribers_;
+      if (this != &rhs) { subscribers_ = rhs.subscribers_; }
       return *this;
     }
 
     /** Movable assignment. \param[in] rhs tasks for moving */
     tasks<Ts...>& operator=(tasks<Ts...>&& rhs) {
-      if (this != &rhs) subscribers_ = std::move(rhs.subscribers_);
+      if (this != &rhs) { subscribers_ = std::move(rhs.subscribers_); }
       return *this;
     }
 
     /** \returns Const reference to task. \param[in] nm name of task in container */
     task<Ts...>& operator[](const std::string& nm) const {
-      const_iterator_t it = subscribers_.find(nm);
-      if (it != subscribers_.cend()) return *it->second.get();
+      if (auto it = subscribers_.find(nm); it != std::cend(subscribers_)) { return *it->second.get(); }
       else { return empty_task_; }
     }
 
     /** \returns Reference to task. \param[in] nm name of task in container */
     task<Ts...>& operator[](const std::string& nm) {
-      iterator_t it = subscribers_.find(nm);
-      if (it != subscribers_.end()) return *it->second.get();
+      if (auto it = subscribers_.find(nm); it != std::end(subscribers_)) { return *it->second.get(); }
       else { return empty_task_; }
     }
 
     /** \returns Const reference to task. \param[in] i index of task in container */
     task<Ts...>& operator[](std::size_t i) const {
-      if (i < subscribers_.size()) {
-        for (const_iterator_t it = subscribers_.cbegin(); it != subscribers_.cend(); ++it) {
-          if (!i--) return *it->second.get();
+      if (i < std::size(subscribers_)) {
+        for (auto it = std::cbegin(subscribers_); it != std::cend(subscribers_); ++it) {
+          if (!i--) { return *it->second.get(); }
         }
-      } else { return empty_task_; }
+      } return empty_task_;
     }
 
     /** \returns Reference to task. \param[in] i index of task in container */
     task<Ts...>& operator[](std::size_t i) {
-      if (i < subscribers_.size()) {
-        for (iterator_t it = subscribers_.begin(); it != subscribers_.end(); ++it) {
-          if (!i--) return *it->second.get();
+      if (i < std::size(subscribers_)) {
+        for (auto it = std::begin(subscribers_); it != std::end(subscribers_); ++it) {
+          if (!i--) { return *it->second.get(); }
         }
-      } else { return empty_task_; }
+      } return empty_task_;
     }
 
   };

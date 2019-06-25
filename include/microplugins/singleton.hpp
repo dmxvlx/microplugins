@@ -9,7 +9,7 @@ namespace micro {
 
   /**
     \class singleton
-    \brief Realization template version of the singleton pattern
+    \brief Template version of the singleton pattern
     \author Dmitrij Volin
     \date august of 2018 year
     \copyright Boost Software License - Version 1.0
@@ -57,6 +57,8 @@ namespace micro {
 
     static std::shared_ptr<T> instance_;
 
+  public:
+
     singleton(const singleton<T>& rhs) = delete;
 
     singleton(singleton<T>&& rhs) = delete;
@@ -65,15 +67,13 @@ namespace micro {
 
     singleton<T>& operator=(singleton<T>&& rhs) = delete;
 
-  public:
-
     /** \returns Shared pointer to instance of T. \param[in] args arguments depends on Constructor of T */
     template<typename... Ts>
     static std::shared_ptr<T> get(Ts&&... args) {
       static std::recursive_mutex mtx = {};
       if (!instance_.get()) {
         std::unique_lock<std::recursive_mutex> lock(mtx);
-        if (!instance_.get()) instance_.reset(new T(args...));
+        if (!instance_.get()) { instance_.reset(new T(args...)); }
       } return instance_;
     }
 

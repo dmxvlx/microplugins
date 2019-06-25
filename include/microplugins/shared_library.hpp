@@ -107,7 +107,7 @@ namespace micro {
     template<typename T>
     std::function<T> get(const std::string& s) {
       std::function<T> r = nullptr;
-      if (dll_ != nullptr) r = reinterpret_cast<T*>(dlsym(dll_, s.c_str()));
+      if (dll_ != nullptr) { r = reinterpret_cast<T*>(dlsym(dll_, s.c_str())); }
       return r;
     }
 
@@ -124,14 +124,14 @@ namespace micro {
       std::size_t npaths1 = 0, npaths2 = 0;
       std::vector<std::string> paths, paths0 = explode(path0, ":"), paths2 = explode(std::getenv("PATH"), ":");
 
-      if (!path0.empty()) env_path = path0 + ":" + env_path;
+      if (!path0.empty()) { env_path = path0 + ":" + env_path; }
       paths = explode(env_path, ":");
-      npaths1 = paths.size();
-      paths.insert(paths.end(), paths2.begin(), paths2.end());
-      npaths2 = paths.size();
+      npaths1 = std::size(paths);
+      paths.insert(std::end(paths), std::begin(paths2), std::end(paths2));
+      npaths2 = std::size(paths);
 
-      for (std::size_t _i0 = 0; _i0 < paths0.size(); ++_i0) {
-        for (std::size_t _i2 = 0; _i2 < paths2.size(); ++_i2) {
+      for (std::size_t _i0 = 0; _i0 < std::size(paths0); ++_i0) {
+        for (std::size_t _i2 = 0; _i2 < std::size(paths2); ++_i2) {
           std::string m = paths2[_i2] + "/";
           #ifndef _WIN32
           m += "../lib/";
@@ -147,32 +147,32 @@ namespace micro {
         filter_str += filter_version + ".([dDlL]{3})$";
       }
       #elif defined(__APPLE__) // macos
-      if (name_lib.find("lib") != 0) name_lib = "lib" + name_lib;
-      if (name_lib.find(".dylib") == std::string::npos) filter_str += filter_version + ".dylib" + filter_version;
-      else filter_str += filter_version;
+      if (name_lib.find("lib") != 0) { name_lib = "lib" + name_lib; }
+      if (name_lib.find(".dylib") == std::string::npos) { filter_str += filter_version + ".dylib" + filter_version; }
+      else { filter_str += filter_version; }
       #else // *nix
-      if (name_lib.find("lib") != 0) name_lib = "lib" + name_lib;
-      if (name_lib.find(".so") == std::string::npos) filter_str += filter_version + ".so" + filter_version;
-      else filter_str += filter_version;
+      if (name_lib.find("lib") != 0) { name_lib = "lib" + name_lib; }
+      if (name_lib.find(".so") == std::string::npos) { filter_str += filter_version + ".so" + filter_version; }
+      else { filter_str += filter_version; }
       #endif
 
       const std::regex name_lib_filter(name_lib + filter_str);
       std::error_code ec;
 
-      for (std::size_t _i = 0; _i < paths.size(); ++_i) {
+      for (std::size_t _i = 0; _i < std::size(paths); ++_i) {
         std::string str_path = paths[_i] + "/";
         #ifndef _WIN32
-        if (_i >= npaths1 && _i < npaths2) str_path += "../lib/";
+        if (_i >= npaths1 && _i < npaths2) { str_path += "../lib/"; }
         #endif
 
         for (char* c = std::data(str_path); c && *c; ++c) { if (*c == '\\') *c = '/'; }
 
         std_filesystem::path p(str_path);
-        if (!std_filesystem::is_directory(p, ec)) continue;
+        if (!std_filesystem::is_directory(p, ec)) { continue; }
         std_filesystem::directory_iterator dir_iter(p, ec), end_iter;
         for (; dir_iter != end_iter; ++dir_iter) {
-          if (!std_filesystem::is_regular_file(dir_iter->status())) continue;
-          if (!std::regex_match(dir_iter->path().filename().generic_string(), name_lib_filter)) continue;
+          if (!std_filesystem::is_regular_file(dir_iter->status())) { continue; }
+          if (!std::regex_match(dir_iter->path().filename().generic_string(), name_lib_filter)) { continue; }
           if ((ret = dlopen(dir_iter->path().c_str(), flags))) {
             filename_ = dir_iter->path().generic_string();
             return ret;
@@ -181,12 +181,10 @@ namespace micro {
       }
 
       #if defined(_WIN32)
-      if (_name_lib.find("lib") != 0) return load_dll("lib" + _name_lib, path0, flags);
+      if (_name_lib.find("lib") != 0) { return load_dll("lib" + _name_lib, path0, flags); }
       #endif
 
-      if ((ret = dlopen(name_lib.c_str(), flags))) {
-        filename_ = name_lib;
-      }
+      if ((ret = dlopen(name_lib.c_str(), flags))) { filename_ = name_lib; }
 
       return ret;
     }
@@ -198,7 +196,7 @@ namespace micro {
         paths.push_back(str.substr(s, e - s));
         s = str.find_first_not_of(delims, e);
       }
-      if (s != std::string::npos) paths.push_back(str.substr(s));
+      if (s != std::string::npos) { paths.push_back(str.substr(s));}
       return paths;
     }
 

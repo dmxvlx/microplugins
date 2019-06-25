@@ -101,7 +101,7 @@ namespace micro {
 
     /** \returns Maximum arguments for tasks of storage. */
     std::size_t max_args() const {
-      constexpr static std::size_t nargs = std::tuple_size_v<std::decay_t<decltype(tasks_)>>;
+      constexpr static const std::size_t nargs = std::tuple_size_v<std::decay_t<decltype(tasks_)>>;
       return nargs;
     }
 
@@ -196,7 +196,6 @@ namespace micro {
     inline constexpr static typename std::enable_if_t<I == std::tuple_size_v<T>, void>
     clear_once_impl(T& tasks_) {
       if constexpr (std::tuple_size_v<T> > 0) { if (std::get<0>(tasks_).count()) {} }
-      return;
     }
 
     template<std::size_t I = 0, typename T>

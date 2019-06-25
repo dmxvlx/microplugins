@@ -15,8 +15,8 @@
   std::shared_ptr<micro::iplugin> self = std::any_cast<std::shared_ptr<micro::iplugin>>(a1);
   std::shared_ptr<micro::iplugins> manager = self->get_plugins();
 
-  std::cerr << "kernel version: " << manager->major() << "." << manager->minor() << std::endl;
-  std::cerr << "kernel name: " << manager->name() << std::endl;
+  std::clog << "kernel version: " << manager->major() << "." << manager->minor() << std::endl;
+  std::clog << "kernel name: " << manager->name() << std::endl;
 
   // do work while plugin's service in actived mode (managed by manager)
   while (self->is_run()) {
@@ -29,7 +29,7 @@
         // we can pass the result as argument into any function ...
         result.wait(); // needs wait for calculation the result
         if (result.valid() && result.get().has_value() && result.get().type() == typeid(std::string)) {
-          std::cerr << std::any_cast<std::string>(result.get()) << std::endl;
+          std::clog << std::any_cast<std::string>(result.get()) << std::endl;
         }
       }
     }
@@ -57,7 +57,7 @@ static const char test0_help[] = {
 
 // simple test0 task
 static std::any test0() {
-  std::cerr << "test0" << std::endl;
+  std::clog << "test0" << std::endl;
   return std::make_any<std::string>("hello from test0");
 }
 
@@ -105,7 +105,7 @@ public:
   }
 
   std::any method1(std::any a1) {
-    std::cerr << std::any_cast<std::string>(a1) <<std::endl;
+    std::clog << std::any_cast<std::string>(a1) <<std::endl;
     return std::make_any<std::string>("hello from method1 !");
   }
 

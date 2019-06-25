@@ -5,7 +5,7 @@
 #include "iplugins.hpp"
 #include "shared_library.hpp"
 #include "singleton.hpp"
-#include <iostream> // std::cerr
+#include <iostream> // std::clog
 
 /**
   \mainpage Documentation API
@@ -128,11 +128,12 @@ namespace micro {
     std::atomic<bool> do_work_, expiry_;
     std::atomic<int> error_, max_idle_;
     std::string path_; // paths for plugins
-    std::vector<
+
+    std::map<
+      std::string,
       std::tuple<
-        std::string,
-        std::shared_ptr<iplugin>,
-        std::shared_ptr<micro::shared_library>
+        std::shared_ptr<shared_library>,
+        std::shared_ptr<iplugin>
       >
     > plugins_;
 
@@ -186,9 +187,10 @@ namespace micro {
     /** Runs thread for manage plugins. If plugins kernel has task with name `service' it will called once. \see is_run() */
     void run() {
       std::unique_lock<std::shared_mutex> lock(mtx_);
-      if (do_work_) return;
+      if (do_work_) { return; }
       error_ = 0;
-      do_work_ = true; expiry_ = false;
+      do_work_ = true;
+      expiry_ = false;
       std::thread(&plugins::loop_cb, shared_from_this(), shared_from_this()).detach();
       std::thread(&plugins::service_cb, shared_from_this(), shared_from_this()).detach();
     }
@@ -196,9 +198,9 @@ namespace micro {
     /** Stops thread of management plugins. \see run(), is_run() */
     void stop() {
       std::unique_lock<std::shared_mutex> lock(mtx_);
-      if (!do_work_) return;
+      if (!do_work_) { return; }
       do_work_ = false;
-      while (!expiry_) micro::sleep<micro::milliseconds>(1);
+      while (!expiry_) { micro::sleep<micro::milliseconds>(50); }
       unload_plugins();
       clear_once();
     }
@@ -206,66 +208,63 @@ namespace micro {
     /** \returns Amount of loaded plugins in this moment. \see iplugins::count_plugins() */
     std::size_t count_plugins() const override {
       std::shared_lock<std::shared_mutex> lock(mtx_);
-      return do_work_ ? plugins_.size() : 0;
+      return do_work_ ? std::size(plugins_) : 0;
     }
 
     /** \returns Shared pointer to plugin. \param[in] nm name of plugin \see iplugins::get_plugin(const std::string& nm) */
     std::shared_ptr<iplugin> get_plugin(const std::string& nm) override {
       std::unique_lock<std::shared_mutex> lock(mtx_);
-      if (!do_work_) return nullptr;
+      if (!do_work_) { return nullptr; }
       // search in loaded dll's
-      for (std::size_t _i = 0; _i < plugins_.size(); ++_i) {
-        if (std::get<0>(plugins_[_i]) == nm) {
-          if (std::get<1>(plugins_[_i])) return std::get<1>(plugins_[_i]);
-          else plugins_.erase(plugins_.begin()+_i--);
-        }
-      }
+      if (auto it = plugins_.find(nm); it != std::end(plugins_)) { return std::get<1>(it->second); }
       // try to load dll from system
-      std::shared_ptr<micro::shared_library> dll = nullptr;
-      dll = std::make_shared<micro::shared_library>(nm, path_, RTLD_GLOBAL|RTLD_LAZY);
-      if (dll && dll->is_loaded()) {
-        std::function<import_plugin_cb_t> lp = dll->get<import_plugin_cb_t>("import_plugin");
-        std::shared_ptr<iplugin> pl = nullptr;
-        if (lp && (pl = lp())) {
-          pl->plugins_ = get_shared_ptr();
-          plugins_.push_back({nm,pl,dll});
-          std::thread(&plugins::service_plugin_cb, shared_from_this(), pl).detach();
-          return pl;
+      std::shared_ptr<iplugin> ret = nullptr;
+      if (auto dll = std::make_shared<shared_library>(nm, path_); dll && dll->is_loaded()) {
+        if (auto loader = dll->get<import_plugin_cb_t>("import_plugin"); loader && (ret = loader())) {
+          ret->plugins_ = get_shared_ptr();
+          plugins_[nm] = {dll, ret};
+          std::thread(&plugins::service_plugin_cb, shared_from_this(), ret).detach();
         }
-      } return nullptr;
+      } return ret;
     }
 
     /** \returns Shared pointer to plugin. \param[in] i index of plugin \see count_plugins(), iplugins::get_plugin(int i) */
     std::shared_ptr<iplugin> get_plugin(std::size_t i) override {
       std::shared_lock<std::shared_mutex> lock(mtx_);
-      return (do_work_ && i < plugins_.size()) ? std::get<1>(plugins_[i]) : nullptr;
+      if (do_work_ && i < std::size(plugins_)) {
+        for (auto it = std::begin(plugins_); it != std::end(plugins_); ++it) {
+          if (!i--) { return std::get<1>(it->second); }
+        }
+      } return nullptr;
     }
 
     /** Unloads plugin. \param[in] nm name of plugin */
     void unload_plugin(const std::string& nm) {
       std::unique_lock<std::shared_mutex> lock(mtx_);
-      if (!do_work_) return;
-      for (std::size_t _i = 0; _i < plugins_.size(); ++_i) {
-        if (std::get<0>(plugins_[_i]) == nm) {
-          if (std::get<1>(plugins_[_i])->do_work_) std::get<1>(plugins_[_i])->do_work_ = false;
-          while (std::get<1>(plugins_[_i]).use_count() > 1) {
-            std::cerr << "wait termination plugin: " << std::get<1>(plugins_[_i])->name() << std::endl;
-            micro::sleep<micro::seconds>(1);
-          } plugins_.erase(plugins_.begin()+_i);
-          break;
-        }
+      if (!do_work_) { return; }
+      if (auto it = plugins_.find(nm); it != std::end(plugins_)) {
+        if (std::get<1>(it->second)->do_work_) { std::get<1>(it->second)->do_work_ = false; }
+        while (std::get<1>(it->second).use_count() > 1) {
+          std::clog << "wait termination plugin: " << nm << std::endl;
+          micro::sleep<micro::seconds>(1);
+        } plugins_.erase(it);
       }
     }
 
     /** Unloads plugin. \param[in] i index of plugin \see count_plugins() */
     void unload_plugin(std::size_t i) {
       std::unique_lock<std::shared_mutex> lock(mtx_);
-      if (do_work_ && i < plugins_.size()) {
-        if (std::get<1>(plugins_[i])->do_work_) std::get<1>(plugins_[i])->do_work_ = false;
-        while (std::get<1>(plugins_[i]).use_count() > 1) {
-          std::cerr << "wait termination plugin: " << std::get<1>(plugins_[i])->name() << std::endl;
-          micro::sleep<micro::seconds>(1);
-        } plugins_.erase(plugins_.begin()+i);
+      if (do_work_ && i < std::size(plugins_)) {
+        for (auto it = std::begin(plugins_); it != std::end(plugins_); ++it) {
+          if (!i--) {
+            if (std::get<1>(it->second)->do_work_) { std::get<1>(it->second)->do_work_ = false; }
+            while (std::get<1>(it->second).use_count() > 1) {
+              std::clog << "wait termination plugin: " << std::get<1>(it->second)->name() << std::endl;
+              micro::sleep<micro::seconds>(1);
+            } plugins_.erase(it);
+            break;
+          }
+        }
       }
     }
 
@@ -286,38 +285,35 @@ namespace micro {
       r.wait();
       if (r.valid() && r.get().has_value() && r.get().type() == typeid(int)) {
         k->error_ = std::any_cast<int>(r.get());
-      } else k->error_ = -1;
+      } else { k->error_ = -1; }
     }
 
     void loop_cb(std::shared_ptr<plugins> k) {
       micro::clock_t last_check = micro::now();
       while (k->do_work_) {
-        if (micro::duration<micro::minutes>(last_check, micro::now()) >= 1) {
+        if (micro::duration<micro::milliseconds>(last_check, micro::now()) >= 500) {
           last_check = micro::now();
-          if (!k->max_idle_) continue;
+          if (!k->max_idle_) { continue; }
           // unload plugin which has idle more or equal than `max_idle_' minutes
           // and the plugin is not service (has no task with name `service' in tasks_<1>)
           std::unique_lock<std::shared_mutex> lock(k->mtx_);
-          for (std::size_t _i = 0; _i < k->plugins_.size(); ++_i) {
-            if (std::get<1>(k->plugins_[_i])) {
-              if (k->max_idle_ && std::get<1>(k->plugins_[_i])->idle() >= k->max_idle_ &&
-                  !std::get<1>(k->plugins_[_i])->has<1>("service")) {
-                k->plugins_.erase(k->plugins_.begin()+_i--);
-              }
-            } else { k->plugins_.erase(k->plugins_.begin()+_i--); }
+          for (auto it = std::begin(k->plugins_); it != std::end(k->plugins_); ++it) {
+            if (std::get<1>(it->second)->idle() >= k->max_idle_ && !std::get<1>(it->second)->has<1>("service")) {
+              k->plugins_.erase(it++);
+            }
           }
-        } micro::sleep<micro::milliseconds>(250);
+        } micro::sleep<micro::milliseconds>(100);
       } k->expiry_ = true;
     }
 
     void unload_plugins() {
-      while (plugins_.size() > 0) {
-        for (std::size_t _i = 0; _i < plugins_.size(); ++_i) {
-          if (std::get<1>(plugins_[_i])->do_work_) std::get<1>(plugins_[_i])->do_work_ = false;
-          if (std::get<1>(plugins_[_i]).use_count() > 1) {
-            std::cerr << "wait termination plugin: " << std::get<1>(plugins_[_i])->name() << std::endl;
-          } else plugins_.erase(plugins_.begin()+_i--);
-        } if (plugins_.size() > 0) micro::sleep<micro::seconds>(1);
+      while (!std::empty(plugins_)) {
+        for (auto it = std::begin(plugins_); it != std::end(plugins_); ++it) {
+          if (std::get<1>(it->second)->do_work_) { std::get<1>(it->second)->do_work_ = false; }
+          if (std::get<1>(it->second).use_count() > 1) {
+            std::clog << "wait termination plugin: " << std::get<1>(it->second)->name() << std::endl;
+          } else { plugins_.erase(it++); }
+        } if (!std::empty(plugins_)) { micro::sleep<micro::seconds>(1); }
       }
     }
 

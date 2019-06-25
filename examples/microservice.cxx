@@ -12,7 +12,7 @@ static std::any service(std::any a1) {
   if (manager->is_run()) {
     std::shared_ptr<micro::iplugin> plugin1 = manager->get_plugin("plugin1");
     if (plugin1) {
-      std::cout << "plugin1 is loaded ..." << std::endl;
+      std::clog << "plugin1 is loaded ..." << std::endl;
 
       std::shared_future<std::any> r1, r2, r3, r4;
 
@@ -23,12 +23,12 @@ static std::any service(std::any a1) {
 
       r1.wait(); r2.wait(); r3.wait(), r4.wait();
 
-      std::cout << "task `plugin1::test0()' returned: " << std::any_cast<std::string>(r1.get()) << std::endl;
-      std::cout << "task `plugin1::sum2(25, 25)' returned: " << std::any_cast<int>(r2.get()) << std::endl;
-      std::cout << "task `plugin1::method1(...)' returned: " << std::any_cast<std::string>(r3.get()) << std::endl;
-      std::cout << "task `plugin1::lambda0()' returned: " << std::any_cast<std::string>(r4.get()) << std::endl;
+      std::clog << "task `plugin1::test0()' returned: " << std::any_cast<std::string>(r1.get()) << std::endl;
+      std::clog << "task `plugin1::sum2(25, 25)' returned: " << std::any_cast<int>(r2.get()) << std::endl;
+      std::clog << "task `plugin1::method1(...)' returned: " << std::any_cast<std::string>(r3.get()) << std::endl;
+      std::clog << "task `plugin1::lambda0()' returned: " << std::any_cast<std::string>(r4.get()) << std::endl;
     } else {
-      std::cerr << "can't load plugin1" << std::endl;
+      std::clog << "can't load plugin1" << std::endl;
       ret = -1;
     }
     manager->stop();

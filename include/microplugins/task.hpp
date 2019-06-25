@@ -8,10 +8,6 @@
 #include <any>
 #include <atomic>
 #include <memory>
-#include <cstdlib> // std::free
-#if defined(__GNUG__)
-#include <cxxabi.h> // abi::__cxa_demangle
-#endif
 #include <type_traits>
 #include <limits> // std::numeric_limits
 
@@ -42,25 +38,14 @@ namespace micro {
   private:
 
     clock_t clock_;
-    std::size_t args_;
-    std::string signature_, name_, help_;
+    std::string name_, help_;
     decltype(std::function<std::any(Ts...)>()) fn_;
     std::atomic<bool> is_once_;
 
   public:
 
     /** Creates empty task. */
-    task():clock_(micro::now()),args_(sizeof...(Ts)),
-    signature_(typeid(std::any(Ts...)).name()),name_(),help_(),fn_(nullptr),is_once_(false) {
-      #if defined(__GNUG__)
-      int status = -1;
-      std::unique_ptr<char, void(*)(void*)> res {
-        abi::__cxa_demangle(signature_.c_str(), nullptr, nullptr, &status),
-        std::free
-      };
-      if (status == 0) signature_ = res.get();
-      #endif
-    }
+    task():clock_(micro::now()),name_(),help_(),fn_(nullptr),is_once_(false) {}
 
     /** Creates task. \param[in] nm name of task \param[in] t function/method/lambda \param[in] hlp message help for task \see name(), help(), run(Args&&... arg), run_once(Args&&... arg) */
     task(const std::string& nm, const decltype(std::function<std::any(Ts...)>()) &t, const std::string& hlp = {}):task() {
@@ -81,15 +66,15 @@ namespace micro {
     ~task() {}
 
     /** \returns Amount of arguments for task (calculatings in compile time). */
-    std::size_t args() const { return args_; }
-
-    /** \returns Signature of task (calculatings in compile time). */
-    const std::string& signature() const { return signature_; }
+    std::size_t max_args() const {
+      constexpr static const std::size_t nargs = sizeof...(Ts);
+      return nargs;
+    }
 
     /** \returns Shared future for result task called. \param[in] arg arguments for task */
     template<typename... Args>
     std::shared_future<std::any> run(Args&&... arg) {
-      if (is_once_ || !fn_) return {};
+      if (is_once_ || !fn_) { return {}; }
       else {
         clock_ = micro::now();
         return std::async(std::launch::async, fn_, arg...);
@@ -99,7 +84,7 @@ namespace micro {
     /** \returns Shared future for result task called once. \param[in] arg arguments for task */
     template<typename... Args>
     std::shared_future<std::any> run_once(Args&&... arg) {
-      if (is_once_ || !fn_) return {};
+      if (is_once_ || !fn_) { return {}; }
       else {
         is_once_ = true;
         clock_ = micro::now();
@@ -112,7 +97,7 @@ namespace micro {
     std::shared_future<std::any> operator()(Args&&... arg) { return run(arg...); }
 
     /** \returns True if name of task 'service' and numbers of args is 1. */
-    bool is_service() const { return (args_ == 1 && name_ == "service"); }
+    bool is_service() const { return (max_args() == 1 && name_ == "service"); }
 
     /** \returns True if task was called once. \see run_once(Args&&... arg) */
     bool is_once() const { return is_once_; }
@@ -151,28 +136,22 @@ namespace micro {
     task<Ts...>& operator=(const task<Ts...>& rhs) {
       if (this != &rhs) {
         clock_ = rhs.clock_;
-        args_ = rhs.args_;
-        signature_ = rhs.signature_;
         name_ = rhs.name_;
         help_ = rhs.help_;
         fn_ = rhs.fn_;
         is_once_ = rhs.is_once_;
-      }
-      return *this;
+      } return *this;
     }
 
     /** Movable assignment. \param[in] rhs task for moving */
     task<Ts...>& operator=(task<Ts...>&& rhs) {
       if (this != &rhs) {
         clock_ = rhs.clock_;
-        args_ = rhs.args_;
-        signature_ = std::move(rhs.signature_);
         name_ = std::move(rhs.name_);
         help_ = std::move(rhs.help_);
         fn_ = std::move(rhs.fn_);
         is_once_ = rhs.is_once_; // std::atomic is not movable
-      }
-      return *this;
+      } return *this;
     }
 
   };

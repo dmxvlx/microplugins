@@ -15,7 +15,7 @@ namespace micro {
     \date august of 2018 year
     \copyright Boost Software License - Version 1.0
 
-    This interface needed for base of loading plugins.
+    Plugin's interface.
 
     \example plugin1.cxx
   */
