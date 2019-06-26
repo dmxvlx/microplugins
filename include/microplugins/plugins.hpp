@@ -302,6 +302,7 @@ namespace micro {
           std::unique_lock<std::shared_mutex> lock(k->mtx_);
           for (auto it = std::begin(k->plugins_); it != std::end(k->plugins_); ++it) {
             if (std::get<1>(it->second)->idle() >= k->max_idle_ && !std::get<1>(it->second)->has<1>("service")) {
+              std::clog << "unloading plugin '" << std::get<1>(it->second)->name() << "' by achieving max idle time." << std::endl;
               k->plugins_.erase(it++);
             }
           }
