@@ -150,7 +150,9 @@ namespace micro {
     */
     explicit plugins(int v = make_version(1,0), const std::string& nm = "microplugins service", const std::string& path0 = "microplugins"):
     iplugins<>(v, nm),singleton<plugins<L>>(),std::enable_shared_from_this<plugins<L>>(),
-    do_work_(false),expiry_(true),error_(0),max_idle_(10),path_(path0),plugins_() {}
+    do_work_(false),expiry_(true),error_(0),max_idle_(10),path_(path0),plugins_() {
+      static_assert(L > 0, "\n\nPlease, set up MAX_PLUGINS_ARGS constant as least to value 1 by: /path/to/build $ cmake -DMAX_PLUGINS_ARGS=12 ../ or what you need...\n");
+    }
 
   public:
 
