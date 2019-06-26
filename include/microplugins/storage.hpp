@@ -60,7 +60,9 @@ namespace micro {
   protected:
 
     /** Creates storage of tasks. \param[in] v version of storage \param[in] nm name of storage */
-    explicit storage(int v = make_version(1,0), const std::string& nm = {}):mtx_(),version_(v),name_(nm),tasks_() {}
+    explicit storage(int v = make_version(1,0), const std::string& nm = {}):mtx_(),version_(v),name_(nm),tasks_() {
+      static_assert(L > 0, "\n\nPlease, set up MAX_PLUGINS_ARGS constant as least to value 1 by: /path/to/build $ cmake -DMAX_PLUGINS_ARGS=12 ../ or what you need...\n");
+    }
 
     /** Adds task into storage for given number arguments in I. \param[in] nm name of task \param[in] t function/method/lambda \param[in] hlp message help for task */
     template<std::size_t I, typename T>
