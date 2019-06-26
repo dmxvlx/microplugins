@@ -19,7 +19,7 @@ by different compiler and/or linked with different libstdc++
 
 # Installation
 Compiling:
-> $ mkdir build && cd build && cmake -DMAX_PLUGINS_ARGS=8 .. && make
+> $ mkdir build && cd build && cmake -DMAX_PLUGINS_ARGS=12 ../ && make
 
 Installation:
 > $ make install

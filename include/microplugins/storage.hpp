@@ -29,7 +29,7 @@ namespace micro {
 
     You can change it for your needs by defining constant with cmake while configure:
 
-    > ~/build $ cmake -DMAX_PLUGINS_ARGS=2 ../
+    > ~/build $ cmake -DMAX_PLUGINS_ARGS=12 ../
 
     \see subscribe(const std::string& nm, const T& t, const std::string& hlp), unsubscribe(const T& nm)
   */
@@ -65,7 +65,7 @@ namespace micro {
     /** Adds task into storage for given number arguments in I. \param[in] nm name of task \param[in] t function/method/lambda \param[in] hlp message help for task */
     template<std::size_t I, typename T>
     void subscribe(const std::string& nm, const T& t, const std::string& hlp = {}) {
-      static_assert(I < L, "\n\nOut of range for valid number arguments of plugin's function. \nPlease, set it to larger value by: /path/to/build $ cmake -DMAX_PLUGINS_ARGS=12 ../ or what you need...\n");
+      static_assert((L > 0 && I < L), "\n\nOut of range for valid number arguments of plugin's function. \nPlease, set it to larger value by: /path/to/build $ cmake -DMAX_PLUGINS_ARGS=12 ../ or what you need...\n");
       std::unique_lock<std::shared_mutex> lock(mtx_);
       std::get<I>(tasks_).subscribe(nm, t, hlp);
     }

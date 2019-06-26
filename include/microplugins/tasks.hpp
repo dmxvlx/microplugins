@@ -73,7 +73,7 @@ namespace micro {
       }
     }
 
-    /** \returns Shared future for result of called task. \param[in] nm index or name of task \param[in] arg arguments for task \see task::run(std::forward<Args>(args)...), operator[](const std::string& nm), operator[](int i) */
+    /** \returns Shared future for result of called task. \param[in] nm index or name of task \param[in] args arguments for task \see task::run(Args&&... args), operator[](const std::string& nm), operator[](std::size_t i) */
     template<typename T, typename... Args>
     inline std::shared_future<std::any> operator()(const T& nm, Args&&... args) {
       return (*this)[nm](std::forward<Args>(args)...);

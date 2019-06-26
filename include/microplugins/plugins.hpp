@@ -36,7 +36,7 @@
 
   # Installation
   Compiling:
-  > $ mkdir build && cd build && cmake -DMAX_PLUGINS_ARGS=8 .. && make
+  > $ mkdir build && cd build && cmake -DMAX_PLUGINS_ARGS=12 ../ && make
 
   Installation:
   > $ make install
@@ -146,7 +146,7 @@ namespace micro {
       \param[in] nm name of the plugins kernel
       \param[in] path0 paths for search plugins exploded by ':', see env $PATH
 
-      \see singleton::get(Ts&&... args), storage::storage(int v, const std::string& nm), storage::version(), storage::name()
+      \see singleton::get(Args&&... args), storage::storage(int v, const std::string& nm), storage::version(), storage::name()
     */
     explicit plugins(int v = make_version(1,0), const std::string& nm = "microplugins service", const std::string& path0 = "microplugins"):
     iplugins<>(v, nm),singleton<plugins<L>>(),std::enable_shared_from_this<plugins<L>>(),
@@ -159,12 +159,6 @@ namespace micro {
 
     /** \see storage::unsubscribe(const T& nm) */
     using storage<>::unsubscribe;
-
-    /** \see storage::run_once(const T& nm, Args&&... args) */
-    using storage<>::run_once;
-
-    /** \see storage::has(const T& nm) */
-    using storage<>::has;
 
     plugins& operator=(const plugins& rhs) = delete;
 
