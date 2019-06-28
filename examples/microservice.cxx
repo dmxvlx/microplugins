@@ -12,6 +12,7 @@ static std::any service(std::any a1) {
   // we can do loop while manager->is_run() - for real service ...
   if (manager->is_run()) {
     std::shared_ptr<micro::iplugin<>> plugin1 = manager->get_plugin("plugin1");
+    std::shared_ptr<micro::iplugin<>> plugin2 = manager->get_plugin("bad_plugin1");
     if (plugin1) {
       std::clog << "plugin1 is loaded ..." << std::endl;
 

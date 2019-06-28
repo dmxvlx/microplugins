@@ -31,6 +31,10 @@ add_library(plugin1 SHARED ${CMAKE_CURRENT_SOURCE_DIR}/examples/plugin1.cxx)
 target_compile_options(plugin1 PUBLIC ${CXXFLAGS})
 target_link_libraries(plugin1 ${LDLIBS})
 
+add_library(bad_plugin1 SHARED ${CMAKE_CURRENT_SOURCE_DIR}/examples/bad_plugin1.cxx)
+target_compile_options(bad_plugin1 PUBLIC ${CXXFLAGS})
+target_link_libraries(bad_plugin1 ${LDLIBS})
+
 # https://habr.com/post/133512/
 set(DOXY_INPUT ${CMAKE_CURRENT_SOURCE_DIR}/include/microplugins)
 set(DOXY_EXAMPLE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/examples)
