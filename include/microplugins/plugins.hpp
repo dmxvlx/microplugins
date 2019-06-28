@@ -221,10 +221,18 @@ namespace micro {
       std::shared_ptr<iplugin<>> ret = nullptr;
       if (auto dll = std::make_shared<shared_library>(nm, path_); dll && dll->is_loaded()) {
         if (auto loader = dll->get<import_plugin_cb_t>("import_plugin"); loader && (ret = loader(typeid(micro::iplugin<>)))) {
+          #ifndef NDEBUG
+          std::clog << "loaded plugin: '" << nm << "'" << std::endl;
+          #endif
           ret->plugins_ = get_shared_ptr();
           plugins_[nm] = {dll, ret};
           std::thread(&plugins<>::service_plugin_cb, plugins<>::shared_from_this(), ret).detach();
         }
+      }
+      if (!ret) {
+        #ifndef NDEBUG
+        std::clog << "unable to load plugin: '" << nm << "'" << std::endl;
+        #endif
       } return ret;
     }
 
@@ -245,7 +253,9 @@ namespace micro {
       if (auto it = plugins_.find(nm); it != std::end(plugins_)) {
         if (std::get<1>(it->second)->do_work_) { std::get<1>(it->second)->do_work_ = false; }
         while (std::get<1>(it->second).use_count() > 1) {
+          #ifndef NDEBUG
           std::clog << "wait termination plugin: " << nm << std::endl;
+          #endif
           micro::sleep<micro::seconds>(1);
         } plugins_.erase(it);
       }
@@ -259,7 +269,9 @@ namespace micro {
           if (!i--) {
             if (std::get<1>(it->second)->do_work_) { std::get<1>(it->second)->do_work_ = false; }
             while (std::get<1>(it->second).use_count() > 1) {
+              #ifndef NDEBUG
               std::clog << "wait termination plugin: " << std::get<1>(it->second)->name() << std::endl;
+              #endif
               micro::sleep<micro::seconds>(1);
             } plugins_.erase(it);
             break;
@@ -299,7 +311,9 @@ namespace micro {
           std::unique_lock<std::shared_mutex> lock(k->mtx_);
           for (auto it = std::begin(k->plugins_); it != std::end(k->plugins_); ++it) {
             if (std::get<1>(it->second)->idle() >= k->max_idle_ && !std::get<1>(it->second)->has<1>("service")) {
+              #ifndef NDEBUG
               std::clog << "unloading plugin '" << std::get<1>(it->second)->name() << "' by achieving max idle time." << std::endl;
+              #endif
               k->plugins_.erase(it++);
             }
           }
@@ -312,7 +326,9 @@ namespace micro {
         for (auto it = std::begin(plugins_); it != std::end(plugins_); ++it) {
           if (std::get<1>(it->second)->do_work_) { std::get<1>(it->second)->do_work_ = false; }
           if (std::get<1>(it->second).use_count() > 1) {
+            #ifndef NDEBUG
             std::clog << "wait termination plugin: " << std::get<1>(it->second)->name() << std::endl;
+            #endif
           } else { plugins_.erase(it++); }
         } if (!std::empty(plugins_)) { micro::sleep<micro::seconds>(1); }
       }

@@ -1,6 +1,9 @@
 #ifndef MICROSERVICE_CXX
 #define MICROSERVICE_CXX
 
+// uncoment for disable debug information
+// #define NDEBUG
+
 #include "plugins.hpp"
 
 #include <csignal>
@@ -14,7 +17,6 @@ static std::any service(std::any a1) {
     std::shared_ptr<micro::iplugin<>> plugin1 = manager->get_plugin("plugin1");
     std::shared_ptr<micro::iplugin<>> plugin2 = manager->get_plugin("bad_plugin1");
     if (plugin1) {
-      std::clog << "plugin1 is loaded ..." << std::endl;
 
       std::shared_future<std::any> r1, r2, r3, r4;
 
@@ -30,7 +32,6 @@ static std::any service(std::any a1) {
       std::clog << "task `plugin1::method1(...)' returned: " << std::any_cast<std::string>(r3.get()) << std::endl;
       std::clog << "task `plugin1::lambda0()' returned: " << std::any_cast<std::string>(r4.get()) << std::endl;
     } else {
-      std::clog << "can't load plugin1" << std::endl;
       ret = -1;
     }
     manager->stop();
