@@ -51,7 +51,8 @@ public:
 
 static std::shared_ptr<plugin1> instance = nullptr;
 
-std::shared_ptr<micro::iplugin<>> import_plugin() {
+std::shared_ptr<micro::iplugin<>> import_plugin(const std::type_info& i) {
+  if (i != typeid(micro::iplugin<>)) { return nullptr; }
   return instance ? instance : (instance = std::make_shared<plugin1>(micro::make_version(1,0), "plugin1"));
 }
 ```
