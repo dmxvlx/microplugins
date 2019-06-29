@@ -123,7 +123,7 @@ static std::shared_ptr<plugin1> instance = nullptr;
 // extern function, that declared in "iplugin.hpp", for export the plugin from dll
 std::shared_ptr<micro::iplugin<>> import_plugin(const std::type_info& i) {
   if (i != typeid(micro::iplugin<>)) {
-    std::clog << "type of plugin is mismatch !" << std::endl;
+    // std::clog << "type of plugin is mismatch !" << std::endl;
     return nullptr;
   }
   return instance ? instance : (instance = std::make_shared<plugin1>(micro::make_version(1,0), "bad_plugin1"));
