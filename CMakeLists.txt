@@ -21,6 +21,10 @@ if(MAX_PLUGINS_ARGS)
   add_definitions(-DMAX_PLUGINS_ARGS=${MAX_PLUGINS_ARGS})
 endif()
 
+if(NDEBUG)
+  add_definitions(-DNDEBUG)
+endif()
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/include/microplugins)
 
 add_executable(microservice ${CMAKE_CURRENT_SOURCE_DIR}/examples/microservice.cxx)
