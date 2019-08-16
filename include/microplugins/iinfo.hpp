@@ -1,8 +1,18 @@
+/** \file iinfo.hpp */
 #ifndef IINFO_HPP_INCLUDED
 #define IINFO_HPP_INCLUDED
 
 namespace micro {
 
+  /**
+    \class iinfo
+    \brief Interface for plugin type
+    \author Dmitrij Volin
+    \date august of 2018 year
+    \copyright Boost Software License - Version 1.0
+
+    Plugin's type interface.
+  */
   class iinfo {
   private:
 
