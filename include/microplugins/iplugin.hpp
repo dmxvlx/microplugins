@@ -50,11 +50,11 @@ namespace micro {
 } // namespace micro
 
 /** Signature of "C" function for loading plugin from dll. \see import_plugin() */
-using import_plugin_cb_t = std::shared_ptr<micro::iplugin<>>(const std::type_info&);
+using import_plugin_cb_t = std::shared_ptr<micro::iplugin<>>();
 
 extern "C" {
   /** \returns Shared pointer to newly created instance of a plugin from dll. */
-  extern std::shared_ptr<micro::iplugin<>> import_plugin(const std::type_info& i);
+  extern std::shared_ptr<micro::iplugin<>> import_plugin();
 }
 
 #endif // IPLUGIN_HPP_INCLUDED

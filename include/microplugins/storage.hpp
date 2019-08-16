@@ -2,6 +2,7 @@
 #ifndef STORAGE_HPP_INCLUDED
 #define STORAGE_HPP_INCLUDED
 
+#include "iinfo.hpp"
 #include "tasks.hpp"
 
 #include <shared_mutex>
@@ -34,7 +35,7 @@ namespace micro {
     \see subscribe(const std::string& nm, const T& t, const std::string& hlp), unsubscribe(const T& nm)
   */
   template<std::size_t L = MAX_PLUGINS_ARGS>
-  class storage {
+  class storage : public iinfo {
   private:
 
     template<std::size_t> friend class plugins;
@@ -60,7 +61,8 @@ namespace micro {
   protected:
 
     /** Creates storage of tasks. \param[in] v version of storage \param[in] nm name of storage */
-    explicit storage(int v = make_version(1,0), const std::string& nm = {}):mtx_(),version_(v),name_(nm),tasks_() {
+    explicit storage(int v = make_version(1,0), const std::string& nm = {}):iinfo(typeid(storage<L>)),
+    mtx_(),version_(v),name_(nm),tasks_() {
       static_assert(L > 0, "\n\nPlease, set up MAX_PLUGINS_ARGS constant as least to value 1 by: /path/to/build $ cmake -DMAX_PLUGINS_ARGS=12 ../ or what you need...\n");
     }
 
@@ -95,7 +97,7 @@ namespace micro {
 
   public:
 
-    virtual ~storage() {}
+    ~storage() override {}
 
     /** \returns Version of storage. */
     int version() const { return version_; }

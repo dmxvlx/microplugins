@@ -1,5 +1,5 @@
-#ifndef PLUGIN1_CXX
-#define PLUGIN1_CXX
+#ifndef BAD_PLUGIN1_CXX
+#define BAD_PLUGIN1_CXX
 
 // here we do defining max argument for functions of out plugin by hands (forcing):
 #define MAX_PLUGINS_ARGS 4
@@ -53,7 +53,7 @@
 static const char test0_help[] = {
   "author: Dmitrij Volin\n"
   "function: test0()\n"
-  "description: simple test function for plugin1\n\n"
+  "description: simple test function for bad_plugin1\n\n"
   "arguments: none\n"
   "returns: std::string covered by std::shared_future<std::any>"
 };
@@ -75,11 +75,11 @@ static std::any sum2(std::any a1, std::any a2) {
 
 
 // our class plugin
-class plugin1 final : public micro::iplugin<>, public std::enable_shared_from_this<plugin1> {
+class bad_plugin1 final : public micro::iplugin<>, public std::enable_shared_from_this<bad_plugin1> {
 public:
 
-  plugin1(int v, const std::string& nm):micro::iplugin<>(v, nm),
-  std::enable_shared_from_this<plugin1>() {
+  bad_plugin1(int v, const std::string& nm):micro::iplugin<>(v, nm),
+  std::enable_shared_from_this<bad_plugin1>() {
 
     // warning: in this moment, plugin has no manager in micro::iplugin::plugins_ !
 
@@ -91,7 +91,7 @@ public:
     // task with name `sum2' exists in the plugin already, see unsubscribe
     subscribe<2>("sum2", sum2);
 
-    subscribe<1>("method1", std::bind(&plugin1::method1, this, std::placeholders::_1));
+    subscribe<1>("method1", std::bind(&bad_plugin1::method1, this, std::placeholders::_1));
     subscribe<0>("lambda0", []()->std::any{return std::make_any<std::string>("hello from lambda0 !");});
 
     // note: we can put any type of objects for arguments our tasks,
@@ -102,7 +102,7 @@ public:
     // subscribe<1>("service", service);
   }
 
-  ~plugin1() override {}
+  ~bad_plugin1() override {}
 
   std::shared_ptr<micro::iplugin<>> get_shared_ptr() override {
     return std::shared_ptr<micro::iplugin<>>(shared_from_this());
@@ -117,16 +117,12 @@ public:
 
 
 // instance of the our plugin
-static std::shared_ptr<plugin1> instance = nullptr;
+static std::shared_ptr<bad_plugin1> instance = nullptr;
 
 
 // extern function, that declared in "iplugin.hpp", for export the plugin from dll
-std::shared_ptr<micro::iplugin<>> import_plugin(const std::type_info& i) {
-  if (i != typeid(micro::iplugin<>)) {
-    // std::clog << "type of plugin is mismatch !" << std::endl;
-    return nullptr;
-  }
-  return instance ? instance : (instance = std::make_shared<plugin1>(micro::make_version(1,0), "bad_plugin1"));
+std::shared_ptr<micro::iplugin<>> import_plugin() {
+  return instance ? instance : (instance = std::make_shared<bad_plugin1>(micro::make_version(1,0), "bad_plugin1"));
 }
 
-#endif // PLUGIN1_CXX
+#endif // BAD_PLUGIN1_CXX

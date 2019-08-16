@@ -223,13 +223,15 @@ namespace micro {
       // try to load dll from system
       std::shared_ptr<iplugin<>> ret = nullptr;
       if (auto dll = std::make_shared<shared_library>(nm, path_); dll && dll->is_loaded()) {
-        if (auto loader = dll->get<import_plugin_cb_t>("import_plugin"); loader && (ret = loader(typeid(micro::iplugin<>)))) {
-          #ifndef NDEBUG
-          std::clog << "success" << std::endl;
-          #endif
-          ret->plugins_ = get_shared_ptr();
-          plugins_[nm] = {dll, ret};
-          std::thread(&plugins<>::service_plugin_cb, plugins<>::shared_from_this(), ret).detach();
+        if (auto loader = dll->get<import_plugin_cb_t>("import_plugin"); loader) {
+          if (auto ii = dll->get<std::shared_ptr<micro::iinfo>()>("import_plugin"); ii && ii() && ii()->type_info() == type_info() && (ret = loader())) {
+            ret->plugins_ = get_shared_ptr();
+            plugins_[nm] = {dll, ret};
+            std::thread(&plugins<>::service_plugin_cb, plugins<>::shared_from_this(), ret).detach();
+            #ifndef NDEBUG
+            std::clog << "success" << std::endl;
+            #endif
+          }
         }
       }
       if (!ret) {
