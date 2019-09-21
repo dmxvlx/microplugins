@@ -10,10 +10,10 @@
 
 namespace micro {
 
-  inline int is_le() { static const std::uint32_t i = 0x04030201; return (*((std::uint8_t*)(&i)) == 1); }
-  inline int make_version(int Major, int Minor) { return ((Major << 8) | Minor); }
-  inline int get_major(int Version) { return (Version >> 8); }
-  inline int get_minor(int Version) { return (is_le() ? Version & 0xff : Version & 0xff000000); }
+  inline int is_le() noexcept { static const std::uint32_t i = 0x04030201; return (*((std::uint8_t*)(&i)) == 1); }
+  inline int make_version(int Major, int Minor) noexcept { return ((Major << 8) | Minor); }
+  inline int get_major(int Version) noexcept { return (Version >> 8); }
+  inline int get_minor(int Version) noexcept { return (is_le() ? Version & 0xff : Version & 0xff000000); }
 
   /**
     \class storage
@@ -93,26 +93,26 @@ namespace micro {
     }
 
     /** Clears once flag in all tasks of this container. \see clear_once_impl(T& tasks_) */
-    void clear_once() { clear_once_impl(tasks_); }
+    void clear_once() noexcept { clear_once_impl(tasks_); }
 
   public:
 
     ~storage() override {}
 
     /** \returns Version of storage. */
-    int version() const { return version_; }
+    int version() const noexcept { return version_; }
 
     /** \returns Major version of storage. */
-    int major() const { return get_major(version_); }
+    int major() const noexcept { return get_major(version_); }
 
     /** \returns Minor version of storage. */
-    int minor() const { return get_minor(version_); }
+    int minor() const noexcept { return get_minor(version_); }
 
     /** \returns Name of storage. */
-    const std::string& name() const { return name_; }
+    const std::string& name() const noexcept { return name_; }
 
     /** \returns Maximum arguments for tasks of storage. */
-    std::size_t max_args() const { return L; }
+    std::size_t max_args() const noexcept { return L; }
 
     /** Runs task if it is not once-called for given number arguments in I. \param[in] nm index or name of task \param[in] args arguments for task \returns Shared future for result \see std::shared_future, std::any, std::async */
     template<std::size_t I, typename T, typename... Args>
@@ -124,7 +124,7 @@ namespace micro {
 
     /** \returns Amount tasks in storage for given number arguments in I. */
     template<std::size_t I>
-    inline std::size_t count() const {
+    inline std::size_t count() const noexcept {
       std::shared_lock<std::shared_mutex> lock(mtx_);
       if constexpr (I < L) { return std::get<I>(tasks_).count(); }
       else { return 0; }
@@ -132,7 +132,7 @@ namespace micro {
 
     /** \returns True if tasks in storage has task for given number arguments in I. \param[in] nm index or name of task */
     template<std::size_t I, typename T>
-    inline bool has(const T& nm) const {
+    inline bool has(const T& nm) const noexcept {
       std::shared_lock<std::shared_mutex> lock(mtx_);
       if constexpr (I < L) { return std::get<I>(tasks_).has(nm); }
       else { return false; }
@@ -140,7 +140,7 @@ namespace micro {
 
     /** \returns True if tasks in storage has onced-flag for given number arguments in I. \param[in] nm index or name of task */
     template<std::size_t I, typename T>
-    inline bool is_once(const T& nm) const {
+    inline bool is_once(const T& nm) const noexcept {
       std::shared_lock<std::shared_mutex> lock(mtx_);
       if constexpr (I < L) { return std::get<I>(tasks_)[nm].is_once(); }
       else { return false; }
@@ -148,7 +148,7 @@ namespace micro {
 
     /** \returns Name of task in storage for given number arguments in I. \param[in] nm index or name of task */
     template<std::size_t I, typename T>
-    std::string name(const T& nm) const {
+    std::string name(const T& nm) const noexcept {
       std::shared_lock<std::shared_mutex> lock(mtx_);
       if constexpr (I < L) { return std::get<I>(tasks_)[nm].name(); }
       else { return {}; }
@@ -156,7 +156,7 @@ namespace micro {
 
     /** \returns Message help for task in storage for given number arguments in I. \param[in] nm index or name of task */
     template<std::size_t I, typename T>
-    std::string help(const T& nm) const {
+    std::string help(const T& nm) const noexcept {
       std::shared_lock<std::shared_mutex> lock(mtx_);
       if constexpr (I < L) { return std::get<I>(tasks_)[nm].help(); }
       else { return {}; }
@@ -164,7 +164,7 @@ namespace micro {
 
     /** \returns Idle(in minutes) for task in storage for given number arguments in I. \param[in] nm index or name of task */
     template<std::size_t I, typename T>
-    inline int idle(const T& nm) const {
+    inline int idle(const T& nm) const noexcept {
       std::shared_lock<std::shared_mutex> lock(mtx_);
       if constexpr (I < L) { return std::get<I>(tasks_)[nm].idle(); }
       else { return 0; }
@@ -172,14 +172,14 @@ namespace micro {
 
     /** \returns Idle(in minutes) for all tasks in storage for given number arguments in I. */
     template<std::size_t I>
-    inline int idle() const {
+    inline int idle() const noexcept {
       std::shared_lock<std::shared_mutex> lock(mtx_);
       if constexpr (I < L) { return std::get<I>(tasks_).idle(); }
       else { return 0; }
     }
 
     /** \returns Idle(in minutes) for all tasks in storage. */
-    inline int idle() const {
+    inline int idle() const noexcept {
       int ret = std::numeric_limits<int>::max(), current_idle = 0;
       if ((current_idle = idle<0>()) < ret && !(ret = current_idle)) { return ret; }
       if ((current_idle = idle<1>()) < ret && !(ret = current_idle)) { return ret; }
@@ -195,13 +195,13 @@ namespace micro {
 
     template<std::size_t I = 0, typename T>
     inline constexpr static typename std::enable_if_t<I == std::tuple_size_v<T>, void>
-    clear_once_impl(T& ts) {
+    clear_once_impl(T& ts) noexcept {
       if constexpr (std::tuple_size_v<T> > 0) { if (std::get<0>(ts).count()) {} }
     }
 
     template<std::size_t I = 0, typename T>
     inline constexpr static typename std::enable_if_t<I < std::tuple_size_v<T>, void>
-    clear_once_impl(T& ts) {
+    clear_once_impl(T& ts) noexcept {
       std::get<I>(ts).clear_once();
       clear_once_impl<I+1>(ts);
     }

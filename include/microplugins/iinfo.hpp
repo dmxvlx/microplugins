@@ -24,7 +24,7 @@ namespace micro {
 
     virtual ~iinfo() {}
 
-    const std::type_info& type_info() { return info_; }
+    const std::type_info& type_info() const noexcept { return info_; }
 
   };
 

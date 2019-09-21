@@ -31,7 +31,7 @@ namespace std_filesystem = std::filesystem;
 #define RTLD_NODELETE 0x01000
 
 /** \returns Raw pointer to loaded dll. \param[in] fl file or name of dll \param[in] m flags for loading dll */
-inline void* dlopen(const char *fl, int m) {
+inline void* dlopen(const char *fl, int m) noexcept {
   DWORD flags = LOAD_WITH_ALTERED_SEARCH_PATH;
   if ((m & RTLD_LAZY)) flags |= DONT_RESOLVE_DLL_REFERENCES;
   if (!fl) return static_cast<void*>(GetModuleHandle(nullptr));
@@ -40,13 +40,13 @@ inline void* dlopen(const char *fl, int m) {
 }
 
 /** \rerurns State of unloaded dll. \param[in] hdll raw pointer to dll */
-inline int dlclose(void* hdll) {
+inline int dlclose(void* hdll) noexcept {
   if (!FreeLibrary(static_cast<HMODULE>(hdll))) return -1;
   else return 0;
 }
 
 /** \returns Raw pointer to symbol. \param[in] hdll raw pointer to loaded dll \param[in] s name of symbol(function name, declared as extern in the dll) */
-inline void* dlsym(void* hdll, const char* s) {
+inline void* dlsym(void* hdll, const char* s) noexcept {
   return static_cast<void*>(GetProcAddress(static_cast<HMODULE>(hdll), s));
 }
 
@@ -86,39 +86,39 @@ namespace micro {
     ~shared_library() { unload(); }
 
     /** \returns Full path for loaded dll. */
-    const std::string& filename() const { return filename_; }
+    const std::string& filename() const noexcept { return filename_; }
 
     /** \returns True if dll is loaded. \see load(const std::string& name_lib, const std::string& path0, int flags) */
-    bool is_loaded()  const { return (dll_ != nullptr); }
+    bool is_loaded()  const noexcept { return (dll_ != nullptr); }
 
     /** Unloads dll. \see load(const std::string& name_lib, const std::string& path0, int flags) */
-    void unload() { if (is_loaded()) { dlclose(dll_); dll_ = nullptr; filename_.clear(); } }
+    void unload() noexcept { if (is_loaded()) { dlclose(dll_); dll_ = nullptr; filename_.clear(); } }
 
     /** \returns True if dll was loaded. \param[in] name_lib name of library \param[in] path0 paths for search \param[in] flags flags for loading dll */
-    bool load(const std::string& name_lib, const std::string& path0 = {}, int flags = RTLD_GLOBAL|RTLD_LAZY) {
+    bool load(const std::string& name_lib, const std::string& path0 = {}, int flags = RTLD_GLOBAL|RTLD_LAZY) noexcept {
       unload();
       return ((dll_ = load_dll(name_lib, path0, flags)) != nullptr);
     }
 
     /** \returns True if dll has symbol. \param[in] s name of symbol/function/variable \see dlsym(void*, const char*) */
-    bool has(const std::string& s) const { return (!dll_ || !dlsym(dll_, s.c_str())) ? false : true; }
+    bool has(const std::string& s) const noexcept { return (!dll_ || !dlsym(dll_, s.c_str())) ? false : true; }
 
     /** \returns Pointer covered by std::function from loaded dll. \param[in] s name of function */
     template<typename T>
-    std::function<T> get(const std::string& s) {
+    std::function<T> get(const std::string& s) noexcept {
       std::function<T> r = nullptr;
       if (dll_ != nullptr) { r = reinterpret_cast<T*>(dlsym(dll_, s.c_str())); }
       return r;
     }
 
     /** \returns Raw pointer to symbol \param[in] s name of symbol \see dlsym(void*, const char*) */
-    void* get_raw(const std::string& s) { return dll_ ? dlsym(dll_, s.c_str()) : nullptr; }
+    void* get_raw(const std::string& s) noexcept { return dll_ ? dlsym(dll_, s.c_str()) : nullptr; }
 
     shared_library& operator=(const shared_library& rhs) = delete;
 
   private:
 
-    void* load_dll(const std::string& _name_lib, const std::string& path0 = {}, int flags = RTLD_GLOBAL|RTLD_LAZY) {
+    void* load_dll(const std::string& _name_lib, const std::string& path0 = {}, int flags = RTLD_GLOBAL|RTLD_LAZY) noexcept {
       void* ret = nullptr;
       std::string name_lib = _name_lib, filter_str, filter_version, env_path = ".:lib:plugins:../lib:../plugins:../lib/plugins";
       std::size_t npaths1 = 0, npaths2 = 0;
@@ -189,7 +189,7 @@ namespace micro {
       return ret;
     }
 
-    std::vector<std::string> explode(const std::string& str, const std::string& delims) {
+    std::vector<std::string> explode(const std::string& str, const std::string& delims) noexcept {
       std::vector<std::string> paths;
       std::size_t s = str.find_first_not_of(delims), e = 0;
       while ((e = str.find_first_of(delims, s)) != std::string::npos) {

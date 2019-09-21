@@ -11,10 +11,10 @@ set(microplugins_VERSION_MINOR 0)
 
 if(WIN32)
   set(CXXFLAGS -O2 -s -Wall -Wextra)
-  set(LDLIBS pthread stdc++fs ole32 oleaut32 psapi advapi32)
+  set(LDLIBS -s pthread stdc++fs ole32 oleaut32 psapi advapi32)
 else()
   set(CXXFLAGS -O2 -s -Wall -Wextra)
-  set(LDLIBS dl pthread stdc++fs)
+  set(LDLIBS -s dl pthread stdc++fs)
 endif()
 
 if(MAX_PLUGINS_ARGS)

@@ -172,19 +172,19 @@ namespace micro {
     }
 
     /** \returns State of plugins kernel. \see run() */
-    bool is_run() const { return do_work_; }
+    bool is_run() const noexcept { return do_work_; }
 
     /** \returns Error. */
-    int error() const { return error_; }
+    int error() const noexcept { return error_; }
 
     /** \returns Max idle in minutes. \see max_idle(int i) */
-    int max_idle() const { return max_idle_; }
+    int max_idle() const noexcept { return max_idle_; }
 
     /** Sets max idle. All loaded plugins thats has idle more or equal to it value will be unloaded. \param[in] i value in minutes, 0 - for unlimited resident loaded plugins in RAM. \see max_idle() */
-    void max_idle(int i) { if (i >= 0) { max_idle_ = i; } }
+    void max_idle(int i) noexcept { if (i >= 0) { max_idle_ = i; } }
 
     /** Runs thread for manage plugins. If plugins kernel has task with name `service' it will called once. \see is_run() */
-    void run() {
+    void run() noexcept {
       std::unique_lock<std::shared_mutex> lock(storage<>::mtx_);
       if (do_work_) { return; }
       error_ = 0;
@@ -195,7 +195,7 @@ namespace micro {
     }
 
     /** Stops thread of management plugins. \see run(), is_run() */
-    void stop() {
+    void stop() noexcept {
       std::unique_lock<std::shared_mutex> lock(storage<>::mtx_);
       if (!do_work_) { return; }
       do_work_ = false;
@@ -216,7 +216,7 @@ namespace micro {
       if (!do_work_) { return nullptr; }
       // search in loaded dll's
       if (auto it = plugins_.find(nm); it != std::end(plugins_)) { return std::get<1>(it->second); }
-      #ifndef NDEBUG
+      #if (!defined(NDEBUG) || defined(DEBUG))
       std::clog << "[microplugins] status of loading plugin '" << nm << "': ";
       #endif
       // try to load dll from system
@@ -227,14 +227,14 @@ namespace micro {
             ret->plugins_ = get_shared_ptr();
             plugins_[nm] = {dll, ret};
             std::thread(&plugins<>::service_plugin_cb, plugins<>::shared_from_this(), ret).detach();
-            #ifndef NDEBUG
+            #if (!defined(NDEBUG) || defined(DEBUG))
             std::clog << "success" << std::endl;
             #endif
           }
         }
       }
       if (!ret) {
-        #ifndef NDEBUG
+        #if (!defined(NDEBUG) || defined(DEBUG))
         std::clog << "fail" << std::endl;
         #endif
       } return ret;
@@ -251,13 +251,13 @@ namespace micro {
     }
 
     /** Unloads plugin. \param[in] nm name of plugin */
-    void unload_plugin(const std::string& nm) {
+    void unload_plugin(const std::string& nm) noexcept {
       std::unique_lock<std::shared_mutex> lock(storage<>::mtx_);
       if (!do_work_) { return; }
       if (auto it = plugins_.find(nm); it != std::end(plugins_)) {
         if (std::get<1>(it->second)->do_work_) { std::get<1>(it->second)->do_work_ = false; }
         while (std::get<1>(it->second).use_count() > 1) {
-          #ifndef NDEBUG
+          #if (!defined(NDEBUG) || defined(DEBUG))
           std::clog << "[microplugins] wait termination plugin: '" << nm << "'" << std::endl;
           #endif
           micro::sleep<micro::seconds>(1);
@@ -266,14 +266,14 @@ namespace micro {
     }
 
     /** Unloads plugin. \param[in] i index of plugin \see count_plugins() */
-    void unload_plugin(std::size_t i) {
+    void unload_plugin(std::size_t i) noexcept {
       std::unique_lock<std::shared_mutex> lock(storage<>::mtx_);
       if (do_work_ && i < std::size(plugins_)) {
         for (auto it = std::begin(plugins_); it != std::end(plugins_); ++it) {
           if (!i--) {
             if (std::get<1>(it->second)->do_work_) { std::get<1>(it->second)->do_work_ = false; }
             while (std::get<1>(it->second).use_count() > 1) {
-              #ifndef NDEBUG
+              #if (!defined(NDEBUG) || defined(DEBUG))
               std::clog << "[microplugins] wait termination plugin: '" << std::get<1>(it->second)->name() << "'" << std::endl;
               #endif
               micro::sleep<micro::seconds>(1);
@@ -304,7 +304,7 @@ namespace micro {
       } else { k->error_ = -1; }
     }
 
-    void loop_cb(std::shared_ptr<plugins<>> k) {
+    void loop_cb(std::shared_ptr<plugins<>> k) noexcept {
       micro::clock_t last_check = micro::now();
       while (k->do_work_) {
         if (micro::duration<micro::milliseconds>(last_check, micro::now()) >= 500) {
@@ -315,7 +315,7 @@ namespace micro {
           std::unique_lock<std::shared_mutex> lock(k->mtx_);
           for (auto it = std::begin(k->plugins_); it != std::end(k->plugins_); ++it) {
             if (std::get<1>(it->second)->idle() >= k->max_idle_ && !std::get<1>(it->second)->has<1>("service")) {
-              #ifndef NDEBUG
+              #if (!defined(NDEBUG) || defined(DEBUG))
               std::clog << "[microplugins] unloading plugin '" << std::get<1>(it->second)->name() << "' by achieving max idle time." << std::endl;
               #endif
               k->plugins_.erase(it++);
@@ -325,12 +325,12 @@ namespace micro {
       } k->expiry_ = true;
     }
 
-    void unload_plugins() {
+    void unload_plugins() noexcept {
       while (!std::empty(plugins_)) {
         for (auto it = std::begin(plugins_); it != std::end(plugins_); ++it) {
           if (std::get<1>(it->second)->do_work_) { std::get<1>(it->second)->do_work_ = false; }
           if (std::get<1>(it->second).use_count() > 1) {
-            #ifndef NDEBUG
+            #if (!defined(NDEBUG) || defined(DEBUG))
             std::clog << "[microplugins] wait termination plugin: '" << std::get<1>(it->second)->name() << "'" << std::endl;
             #endif
           } else { plugins_.erase(it++); }

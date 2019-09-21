@@ -69,7 +69,7 @@ namespace micro {
 
     /** \returns Shared pointer to instance of T. \param[in] args arguments depends on Constructor of T */
     template<typename... Ts>
-    static std::shared_ptr<T> get(Ts&&... args) {
+    static std::shared_ptr<T> get(Ts&&... args) noexcept {
       static std::recursive_mutex mtx = {};
       if (!instance_.get()) {
         std::unique_lock<std::recursive_mutex> lock(mtx);

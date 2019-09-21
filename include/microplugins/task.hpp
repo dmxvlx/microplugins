@@ -71,7 +71,7 @@ namespace micro {
     ~task() {}
 
     /** \returns Amount of arguments for task (calculatings in compile time). */
-    std::size_t max_args() const {
+    std::size_t max_args() const noexcept {
       constexpr static const std::size_t nargs = sizeof...(Ts);
       return nargs;
     }
@@ -102,34 +102,34 @@ namespace micro {
     inline std::shared_future<std::any> operator()(Args&&... args) { return run(std::forward<Args>(args)...); }
 
     /** \returns True if name of task 'service' and numbers of args is 1. */
-    inline bool is_service() const { return (max_args() == 1 && name_ == "service"); }
+    inline bool is_service() const noexcept { return (max_args() == 1 && name_ == "service"); }
 
     /** \returns True if task was called once. \see run_once(Args&&... args) */
-    inline bool is_once() const { return is_once_; }
+    inline bool is_once() const noexcept { return is_once_; }
 
     /** Clears once flag. \see run_once(Args&&... args), is_once() */
-    void clear_once() { is_once_ = false; }
+    void clear_once() noexcept { is_once_ = false; }
 
     /** \returns Name of task. \see name(const std::string& nm) */
-    const std::string& name() const { return name_; }
+    const std::string& name() const noexcept { return name_; }
 
     /** Sets name for task. \param[in] nm name for task \see name() */
-    void name(const std::string& nm) { name_ = nm; }
+    void name(const std::string& nm) noexcept { name_ = nm; }
 
     /** \returns Message help for task. \see help(const std::string& nm) */
-    const std::string& help() const { return help_; }
+    const std::string& help() const noexcept { return help_; }
 
     /** Sets message help for task. \param[in] hlp message help \see help() */
-    void help(const std::string& hlp) { help_ = hlp; }
+    void help(const std::string& hlp) noexcept { help_ = hlp; }
 
     /** \returns Idle for task in minutes */
-    inline int idle()  const { return micro::duration<micro::minutes>(clock_, micro::now()); }
+    inline int idle()  const noexcept { return int(micro::duration<micro::minutes>(clock_, micro::now())); }
 
     /** Resets pointer to function. */
-    void reset() { fn_ = nullptr; }
+    void reset() noexcept { fn_ = nullptr; }
 
     /** \returns True if task is nulled. */
-    bool empty() const { return (fn_.target() == nullptr); }
+    bool empty() const noexcept { return (fn_.target() == nullptr); }
 
     /** Assignment. \param[in] t function/method/lambda */
     task<Ts...>& operator=(const decltype(std::function<std::any(Ts...)>()) &t) {
@@ -138,7 +138,7 @@ namespace micro {
     }
 
     /** Copyable assignment. \param[in] rhs task for copying */
-    task<Ts...>& operator=(const task<Ts...>& rhs) {
+    task<Ts...>& operator=(const task<Ts...>& rhs) noexcept {
       if (this != &rhs) {
         clock_ = rhs.clock_;
         name_ = rhs.name_;
@@ -149,7 +149,7 @@ namespace micro {
     }
 
     /** Movable assignment. \param[in] rhs task for moving */
-    task<Ts...>& operator=(task<Ts...>&& rhs) {
+    task<Ts...>& operator=(task<Ts...>&& rhs) noexcept {
       if (this != &rhs) {
         clock_ = rhs.clock_;
         name_ = std::move(rhs.name_);

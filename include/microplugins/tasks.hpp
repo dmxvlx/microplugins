@@ -53,19 +53,19 @@ namespace micro {
     ~tasks() {}
 
     /** Adds task into container. \param[in] nm name of task \param[in] t function/method/lambda \param[in] hlp message help for task */
-    void subscribe(const std::string& nm, const decltype(std::function<std::any(Ts...)>()) &t, const std::string& hlp = {}) {
+    void subscribe(const std::string& nm, const decltype(std::function<std::any(Ts...)>()) &t, const std::string& hlp = {}) noexcept {
       if (!std::empty(nm) && subscribers_.find(nm) == std::end(subscribers_) && !!t) {
         subscribers_[nm] = std::make_shared<task<Ts...>>(nm, t, hlp);
       }
     }
 
     /** Removes task from container. \param[in] nm name of task */
-    void unsubscribe(const std::string& nm) {
+    void unsubscribe(const std::string& nm) noexcept {
       if (auto it = subscribers_.find(nm); it != std::end(subscribers_)) { subscribers_.erase(it); }
     }
 
     /** Removes task from container. \param[in] i index of task */
-    void unsubscribe(std::size_t i) {
+    void unsubscribe(std::size_t i) noexcept {
       if (i < subscribers_.size()) {
         for (auto it = std::begin(subscribers_); it != std::end(subscribers_); ++it) {
           if (!i--) { subscribers_.erase(it); break; }
@@ -80,23 +80,23 @@ namespace micro {
     }
 
     /** \returns Number of tasks in container */
-    inline std::size_t count() const { return std::size(subscribers_); }
+    inline std::size_t count() const noexcept { return std::size(subscribers_); }
 
     /** \returns True if container has task. \param[in] nm name of task */
-    inline bool has(const std::string& nm) const { return (subscribers_.find(nm) != subscribers_.end()); }
+    inline bool has(const std::string& nm) const noexcept { return (subscribers_.find(nm) != subscribers_.end()); }
 
     /** \returns True if container has task. \param[in] i index of task */
-    inline bool has(std::size_t i) const { return (i < std::size(subscribers_)); }
+    inline bool has(std::size_t i) const noexcept { return (i < std::size(subscribers_)); }
 
     /** Clears once-flag for all tasks in container \see task::clear_once(), task::is_once() */
-    void clear_once() {
+    void clear_once() noexcept {
       for (auto it = std::begin(subscribers_); it != std::end(subscribers_); ++it) {
         it->second->clear_once();
       }
     }
 
     /** \returns Minimum Idle for all tasks in container. \see task::idle() */
-    inline int idle() const {
+    inline int idle() const noexcept {
       int ret = std::numeric_limits<int>::max(), current_idle = 0;
       for (auto it = std::cbegin(subscribers_); it != std::cend(subscribers_); ++it) {
         if ((current_idle = it->second->idle()) < ret && !(ret = current_idle)) { return ret; }
@@ -104,38 +104,38 @@ namespace micro {
     }
 
     /** Resets all tasks in container. \see task::reset() */
-    void reset() {
+    void reset() noexcept {
       for (auto it = std::begin(subscribers_); it != std::end(subscribers_); ++it) {
         it->second->reset();
       }
     }
 
     /** Copyable assignment. \param[in] rhs tasks for copying */
-    tasks<Ts...>& operator=(const tasks<Ts...>& rhs) {
+    tasks<Ts...>& operator=(const tasks<Ts...>& rhs) noexcept {
       if (this != &rhs) { subscribers_ = rhs.subscribers_; }
       return *this;
     }
 
     /** Movable assignment. \param[in] rhs tasks for moving */
-    tasks<Ts...>& operator=(tasks<Ts...>&& rhs) {
+    tasks<Ts...>& operator=(tasks<Ts...>&& rhs) noexcept {
       if (this != &rhs) { subscribers_ = std::move(rhs.subscribers_); }
       return *this;
     }
 
     /** \returns Const reference to task. \param[in] nm name of task in container */
-    inline task<Ts...>& operator[](const std::string& nm) const {
+    inline task<Ts...>& operator[](const std::string& nm) const noexcept {
       if (auto it = subscribers_.find(nm); it != std::cend(subscribers_)) { return *it->second.get(); }
       else { return empty_task_; }
     }
 
     /** \returns Reference to task. \param[in] nm name of task in container */
-    inline task<Ts...>& operator[](const std::string& nm) {
+    inline task<Ts...>& operator[](const std::string& nm) noexcept {
       if (auto it = subscribers_.find(nm); it != std::end(subscribers_)) { return *it->second.get(); }
       else { return empty_task_; }
     }
 
     /** \returns Const reference to task. \param[in] i index of task in container */
-    inline task<Ts...>& operator[](std::size_t i) const {
+    inline task<Ts...>& operator[](std::size_t i) const noexcept {
       if (i < std::size(subscribers_)) {
         for (auto it = std::cbegin(subscribers_); it != std::cend(subscribers_); ++it) {
           if (!i--) { return *it->second.get(); }
@@ -144,7 +144,7 @@ namespace micro {
     }
 
     /** \returns Reference to task. \param[in] i index of task in container */
-    inline task<Ts...>& operator[](std::size_t i) {
+    inline task<Ts...>& operator[](std::size_t i) noexcept {
       if (i < std::size(subscribers_)) {
         for (auto it = std::begin(subscribers_); it != std::end(subscribers_); ++it) {
           if (!i--) { return *it->second.get(); }

@@ -10,7 +10,7 @@
 namespace micro {
 
   /** \returns String with formated time. \param[in] t time \param[in] is_local local/UTC \param[in] fmt fromatting for output string */
-  inline std::string get_time(std::time_t t/*std::time(nullptr)*/, bool is_local, const std::string& fmt/*"%d.%m.%Y %H:%M:%S"*/) {
+  inline std::string get_time(std::time_t t/*std::time(nullptr)*/, bool is_local, const std::string& fmt/*"%d.%m.%Y %H:%M:%S"*/) noexcept {
     char mbstr[256];
     std::strftime(mbstr, sizeof(mbstr), fmt.c_str(), is_local ? std::localtime(&t) : std::gmtime(&t));
     return mbstr;
@@ -26,22 +26,22 @@ namespace micro {
   using hours = std::chrono::hours; ///< Alias for hours
 
   /** \returns System clock for current time */
-  inline clock_t now() { return std::chrono::system_clock::now(); }
+  inline clock_t now() noexcept { return std::chrono::system_clock::now(); }
 
   /** \returns Time from system clock \param[in] t system clock */
-  inline std::time_t to_time_t(clock_t t) { return std::chrono::system_clock::to_time_t(t); }
+  inline std::time_t to_time_t(clock_t t) noexcept { return std::chrono::system_clock::to_time_t(t); }
 
   /** \returns System clock from time \param[in] t time */
-  inline clock_t from_time_t(std::time_t t) { return std::chrono::system_clock::from_time_t(t); }
+  inline clock_t from_time_t(std::time_t t) noexcept { return std::chrono::system_clock::from_time_t(t); }
 
   /** Sleeps for given precision T. \param[in] value value for sleep */
   template<typename T = milliseconds>
-  inline void sleep(int value) { std::this_thread::sleep_for(T(value)); }
+  inline void sleep(std::time_t value) noexcept { std::this_thread::sleep_for(T(value)); }
 
   /** \returns Duration for given period with precision T. \param[in] start started time \param[in] end ended time */
   template<typename T = milliseconds>
-  inline int duration(clock_t start, clock_t end) {
-    return int(std::chrono::duration_cast<T>(end-start).count());
+  inline std::time_t duration(clock_t start, clock_t end) noexcept {
+    return std::time_t(std::chrono::duration_cast<T>(end-start).count());
   }
 
   /**
@@ -74,30 +74,30 @@ namespace micro {
     ~stopwatch() {}
 
     /** Restarts stopwatch. */
-    inline void restart() { reset(now()); }
+    inline void restart() noexcept { reset(now()); }
 
     /** Stops stopwatch. */
-    inline void stop() { end_ = now(); }
+    inline void stop() noexcept { end_ = now(); }
 
     /** Resets stopwatch. \param[in] x value for timer */
-    inline void reset(clock_t x) { begin_ = end_ = x; }
+    inline void reset(clock_t x) noexcept { begin_ = end_ = x; }
 
     /** \returns Reference to begin of measure. */
-    inline clock_t& begin() { return begin_; }
+    inline clock_t& begin() noexcept { return begin_; }
 
     /** \returns Reference to end of measure. */
-    inline clock_t& end() { return end_; }
+    inline clock_t& end() noexcept { return end_; }
 
     /** \returns Elapsed time with precision T for this stopwatch. \param[in] do_stop stop timer or do not */
     template<typename T = milliseconds>
-    inline int elapsed(bool do_stop = false) {
+    inline std::time_t elapsed(bool do_stop = false) noexcept {
       clock_t end = now();
       return duration<T>(begin_, do_stop ? (end_ = end) : end);
     }
 
     /** \returns Result time with precision T for this stopwatch. */
     template<typename T = milliseconds>
-    inline int result() { return duration<T>(begin_, end_); }
+    inline std::time_t result() noexcept { return duration<T>(begin_, end_); }
 
   };
 
